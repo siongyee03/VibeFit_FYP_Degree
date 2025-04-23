@@ -28,17 +28,52 @@
             android:layout_width="match_parent"
             android:layout_height="40dp" />
 
-        <!-- Avatar -->
-        <ImageView
-            android:id="@+id/avatar"
-            android:layout_width="142dp"
-            android:layout_height="142dp"
-            android:layout_margin="32dp"
+        <!-- Avatar with Add Photo Button -->
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:src="@drawable/ic_avatar_placeholder"
-            android:contentDescription="@string/avatar_description" />
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="32dp">
 
-        <!-- Username -->
+            <!-- Avatar -->
+            <ImageView
+                android:id="@+id/avatar"
+                android:layout_width="142dp"
+                android:layout_height="142dp"
+                android:layout_margin="32dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_avatar_placeholder"
+                android:contentDescription="@string/avatar_description"
+                android:clickable="true"
+                android:focusable="true"/>
+
+            <!-- Add Photo Button wrapped in CardView -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_gravity="bottom|end"
+                android:layout_marginBottom="25dp"
+                android:layout_marginEnd="20dp"
+                app:cardElevation="6dp"
+                app:cardCornerRadius="22dp"
+                app:cardBackgroundColor="@android:color/white">
+
+            <!-- Add Photo Icon -->
+            <ImageView
+                android:id="@+id/iv_add_photo"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:src="@drawable/ic_add_circle"
+                android:scaleType="center"
+                android:contentDescription="@string/addPhoto"
+                android:layout_gravity="center"/>
+            </androidx.cardview.widget.CardView>
+
+        </FrameLayout>
+
+
+    <!-- Username -->
         <EditText
             android:id="@+id/regisUsername"
             android:layout_width="match_parent"

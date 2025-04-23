@@ -18,6 +18,7 @@
     <string name="register">Register</string>
     <string name="already_have_acc">Already have account?</string>
     <string name="login_now">Login Now</string>
+    <string name="addPhoto">Add photo</string>
 
     <!--Home-->
     <string name="welcome">Welcome!</string>
