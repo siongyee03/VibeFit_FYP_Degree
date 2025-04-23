@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary button style -->
+    <style name="ButtonStyle" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/purple_main</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+</resources>
