@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/style_fragment_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <!-- RecyclerView for AI & user chat -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/chat_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:contentDescription="@string/chat_content_description"
+        android:overScrollMode="never"
+        android:paddingBottom="8dp"
+        android:scrollbars="none" />
+
+    <!-- User input bar -->
+    <LinearLayout
+        android:id="@+id/input_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <!-- Upload Image Button -->
+        <ImageButton
+            android:id="@+id/upload_image_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/upload_image"
+            android:paddingStart="0dp"
+            android:paddingEnd="16dp"
+            android:src="@drawable/ic_upload" />
+
+        <EditText
+            android:id="@+id/user_input"
+            style="@style/FontRobotoMonoRegular"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:autofillHints="no"
+            android:background="@drawable/edittext_bg"
+            android:hint="@string/send_message"
+            android:inputType="textMultiLine"
+            android:maxLines="5"
+            android:minHeight="48dp"
+            android:padding="10dp" />
+
+        <ImageButton
+            android:id="@+id/send_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/send"
+            android:src="@drawable/ic_send" />
+    </LinearLayout>
+</LinearLayout>

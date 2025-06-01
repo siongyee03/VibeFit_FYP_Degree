@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="#FFFFFF"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- A Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardElevation="6dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="8dp"
+            app:cardUseCompatPadding="true"
+            app:contentPadding="16dp"
+            app:cardPreventCornerOverlap="true"
+            app:cardStrokeColor="@color/gray_card_stroke"
+            app:cardStrokeWidth="1dp">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:id="@+id/userAvatar"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:contentDescription="@string/user_uploaded_image"
+                        android:src="@drawable/ic_avatar_placeholder"
+                        android:scaleType="centerCrop"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/post_user_circle_bg" />
+
+                    <ImageView
+                        android:id="@+id/genderIcon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="4dp"
+                        android:contentDescription="@string/gender_icon"
+                        android:src="@drawable/ic_female_symbol" />
+
+                    <TextView
+                        android:id="@+id/genderText"
+                        android:text="@string/me"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="8dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/roboto_regular" />
+
+                    <View
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="1dp" />
+
+                    <ImageButton
+                        android:id="@+id/editButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/edit"
+                        android:src="@drawable/ic_edit_pen"
+                        app:tint="@color/black_text"
+                        tools:ignore="DuplicateSpeakableTextCheck" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/edit"
+                        android:textColor="@color/black_text"
+                        android:textSize="14sp"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="8dp"
+                        android:fontFamily="@font/roboto_mono_regular" />
+
+                    <ImageButton
+                        android:id="@+id/deleteButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/delete"
+                        android:src="@drawable/ic_delete_trashcan"
+                        app:tint="@color/black_text"
+                        tools:ignore="DuplicateSpeakableTextCheck" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/delete"
+                        android:textColor="@color/black_text"
+                        android:textSize="14sp"
+                        android:layout_marginStart="4dp"
+                        android:fontFamily="@font/roboto_mono_regular" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_marginTop="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:weightSum="4"
+                    android:orientation="horizontal"
+                    android:baselineAligned="false">
+
+                    <LinearLayout
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/height"
+                            android:textStyle="bold"
+                            android:fontFamily="@font/roboto_regular" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/heightText"
+                            android:text="@string/unknown_data"
+                            android:fontFamily="@font/roboto_regular" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/weight"
+                            android:textStyle="bold"
+                            android:fontFamily="@font/roboto_regular" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/weightText"
+                            android:text="@string/unknown_data"
+                            android:fontFamily="@font/roboto_regular" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/shoe_size"
+                            android:textStyle="bold"
+                            android:fontFamily="@font/roboto_regular" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/shoeSizeText"
+                            android:text="@string/unknown_data"
+                            android:fontFamily="@font/roboto_regular" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/bra_size"
+                            android:textStyle="bold"
+                            android:fontFamily="@font/roboto_regular" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/braSizeText"
+                            android:text="@string/unknown_data"
+                            android:fontFamily="@font/roboto_regular" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- B Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardStrokeColor="@color/gray_card_stroke"
+            app:cardStrokeWidth="1dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardUseCompatPadding="true"
+            app:cardPreventCornerOverlap="true"
+            android:padding="16dp"
+            app:cardElevation="6dp">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/upper_body_size"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/roboto_regular"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_marginTop="16dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="4dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:text="@string/shoulder_width"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="14sp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"/>
+
+                    <TextView
+                        android:id="@+id/shoulderData"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="start"
+                        android:text="@string/unknown_data"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="14sp"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="4dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:text="@string/arm_length"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="14sp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"/>
+
+                    <TextView
+                        android:id="@+id/armLengthData"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="start"
+                        android:text="@string/unknown_data"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="14sp"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="4dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:text="@string/bust"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="14sp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"/>
+
+                    <TextView
+                        android:id="@+id/bustData"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="start"
+                        android:text="@string/unknown_data"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="14sp"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/lower_body_size"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/roboto_regular"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_marginTop="16dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="4dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:text="@string/waist"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="14sp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"/>
+
+                    <TextView
+                        android:id="@+id/waistData"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="start"
+                        android:text="@string/unknown_data"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="14sp"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="4dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:text="@string/hip"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="14sp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"/>
+
+                    <TextView
+                        android:id="@+id/hipData"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="start"
+                        android:text="@string/unknown_data"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="14sp"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/foot_size"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/roboto_regular"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_marginTop="16dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="4dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:text="@string/foot_length"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="14sp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"/>
+
+                    <TextView
+                        android:id="@+id/footLengthData"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="start"
+                        android:text="@string/unknown_data"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="14sp"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/editSizeButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="16dp"
+                    android:paddingHorizontal="16dp"
+                    android:background="@drawable/edit_size_button_bg"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/edit_size"
+                        android:textColor="@color/purple_main"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/roboto_mono_regular" />
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginStart="4dp"
+                        android:contentDescription="@string/edit_size"
+                        android:src="@drawable/ic_arrow_right_no_circle"
+                        app:tint="@color/purple_main" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <LinearLayout
+            android:layout_marginTop="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/aiTryOnButton"
+                android:layout_width="200dp"
+                android:layout_height="40dp"
+                android:text="@string/ai_try_on"
+                android:textColor="@color/black_text"
+                android:background="@drawable/button_gray_border"
+                android:fontFamily="@font/roboto_mono_regular"
+                tools:ignore="ButtonStyle" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

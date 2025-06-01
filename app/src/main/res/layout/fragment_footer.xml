@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/footer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#FFFFFF"
+    android:paddingVertical="8dp">
+
+    <!-- Home -->
+    <LinearLayout
+        android:id="@+id/footer_home"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:minWidth="48dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/icon_home"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:contentDescription="@string/home_page"
+            android:src="@drawable/ic_home" />
+
+        <TextView
+            android:id="@+id/text_home"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/roboto_regular"
+            android:text="@string/home"
+            android:textAllCaps="true"
+            android:textColor="@color/gray"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- Closet -->
+    <LinearLayout
+        android:id="@+id/footer_closet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/footer_home"
+        app:layout_constraintEnd_toStartOf="@id/upload_button"
+        app:layout_constraintHorizontal_chainStyle="spread">
+
+        <ImageView
+            android:id="@+id/icon_closet"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_closet"
+            android:contentDescription="@string/closet_page"/>
+        <TextView
+            android:id="@+id/text_closet"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/closet"
+            android:textAllCaps="true"
+            android:textColor="@color/gray"
+            android:textSize="14sp"
+            android:fontFamily="@font/roboto_regular"/>
+    </LinearLayout>
+
+    <!-- Upload Button (center) -->
+    <ImageButton
+        android:id="@+id/upload_button"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@drawable/bg_upload_post_button"
+        android:src="@drawable/ic_plus"
+        android:scaleType="centerInside"
+        android:contentDescription="@string/upload"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/footer_closet"
+        app:layout_constraintEnd_toStartOf="@id/footer_style" />
+
+    <!-- Style -->
+    <LinearLayout
+        android:id="@+id/footer_style"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:minWidth="48dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/footer_me"
+        app:layout_constraintStart_toEndOf="@id/upload_button"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/icon_style"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:contentDescription="@string/style_page"
+            android:src="@drawable/ic_style" />
+
+        <TextView
+            android:id="@+id/text_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/roboto_regular"
+            android:text="@string/style"
+            android:textAllCaps="true"
+            android:textColor="@color/gray"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- Me -->
+    <LinearLayout
+        android:id="@+id/footer_me"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:minWidth="48dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/icon_me"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:contentDescription="@string/me_page"
+            android:src="@drawable/ic_me" />
+
+        <TextView
+            android:id="@+id/text_me"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/roboto_regular"
+            android:text="@string/me"
+            android:textAllCaps="true"
+            android:textColor="@color/gray"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
