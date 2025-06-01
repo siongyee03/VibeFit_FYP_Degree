@@ -18,10 +18,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import android.widget.Toast;
 
 public class LoginActivity extends AppCompatActivity {
-
+    private static final String TAG = "LoginActivity";
     private EditText loginEmail, loginPass;
     private ImageView passwordToggle;
-
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
@@ -29,8 +28,6 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        db = MyApplication.getFirestore();
 
         // Initialize views
         ImageButton backButton = findViewById(R.id.backButton);
@@ -40,10 +37,13 @@ public class LoginActivity extends AppCompatActivity {
         Button loginButton = findViewById(R.id.loginButton);
         TextView forgotPassword = findViewById(R.id.forgotPassword);
         TextView registerNow = findViewById(R.id.registerNow);
-        ImageView avatar = findViewById(R.id.avatar);
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
+        mAuth.useEmulator("10.0.2.2", 9099); // Auth Emulator
+        //FireStore
+        db = FirebaseFirestore.getInstance();
+        db.useEmulator("10.0.2.2", 8080); // Firestore Emulator
 
         // Back Button Click Listener
         backButton.setOnClickListener(v -> {
@@ -87,8 +87,8 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            if (password.length() < 6) { // Minimum password length (adjust as needed)
-                loginPass.setError("Minimum password length is 6 characters");
+            if (password.length() < 8) { // Minimum password length (adjust as needed)
+                loginPass.setError("Minimum password length is 8 characters");
                 loginPass.requestFocus();
                 return;
             }

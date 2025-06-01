@@ -5,9 +5,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.util.Log;
@@ -42,6 +44,7 @@ public class RegisterActivity extends AppCompatActivity {
     private Uri selectedImageUri;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    private FirebaseStorage storage;
     private StorageReference storageReference;
 
     // ActivityResultLauncher for image picking
@@ -53,8 +56,16 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         mAuth = FirebaseAuth.getInstance();
+        mAuth.useEmulator("10.0.2.2", 9099); // Auth Emulator
+
         db = FirebaseFirestore.getInstance();
-        storageReference = FirebaseStorage.getInstance().getReference();
+        db.useEmulator("10.0.2.2", 8080); // Firestore Emulator
+
+        // Initialize Firebase Storage
+        storage = FirebaseStorage.getInstance();
+        storage.useEmulator("10.0.2.2", 9199); // Connect to the Storage Emulator
+        storageReference = storage.getReference();
+        //storageReference = FirebaseStorage.getInstance().getReference();
 
         // Initializing views
         EditText regisUsername = findViewById(R.id.regisUsername);
@@ -70,6 +81,15 @@ public class RegisterActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> {
             finish(); // return to previous page
         });
+
+        Spinner genderSpinner = findViewById(R.id.spinner_gender);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                this,
+                R.array.gender_options,
+                android.R.layout.simple_spinner_item
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        genderSpinner.setAdapter(adapter);
 
         // Initialize ActivityResultLauncher
         pickImageLauncher = registerForActivityResult(
@@ -102,6 +122,7 @@ public class RegisterActivity extends AppCompatActivity {
             String email = regisEmail.getText().toString().trim();
             String password = regis_pass.getText().toString().trim();
             String confirmPassword = regis_confirm_pass.getText().toString().trim();
+            String selectedGender = genderSpinner.getSelectedItem().toString();
 
             if (username.isEmpty()) {
                 regisUsername.setError("Username is required");
@@ -109,7 +130,7 @@ public class RegisterActivity extends AppCompatActivity {
                 return;
             }
 
-            // Validate the input (VERY important!)
+            // Validation
             if (email.isEmpty()) {
                 regisEmail.setError("Email is required");
                 regisEmail.requestFocus();
@@ -128,8 +149,8 @@ public class RegisterActivity extends AppCompatActivity {
                 return;
             }
 
-            if (password.length() < 6) {
-                regis_pass.setError("Minimum password length is 6 characters");
+            if (password.length() < 8) {
+                regis_pass.setError("Minimum password length is 8 characters");
                 regis_pass.requestFocus();
                 return;
             }
@@ -141,7 +162,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
 
             // If all validations pass, proceed with Firebase registration
-            createAcc(username, email, password);
+            createAcc(username, email, password, selectedGender);
         });
 
         loginNow.setOnClickListener(v -> {
@@ -187,15 +208,13 @@ public class RegisterActivity extends AppCompatActivity {
         editText.setSelection(editText.length()); // keep cursor at the end
     }
 
-    private void createAcc(String username, String email, String password) {
+    private void createAcc(String username, String email, String password, String selectedGender) {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
 
-                        if (user != null) {
-                            // Upload image and store the username in Cloud Firestore
-                            uploadImageAndStoreUser(user, username);
+                        if (user != null) {uploadImageAndStoreUser(user, username, selectedGender);
 
                         } else {
                             Toast.makeText(RegisterActivity.this, "Registration successful, but could not get user.  Please try logging in.",
@@ -215,7 +234,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     // Upload Image and Store User Info
-    private void uploadImageAndStoreUser(FirebaseUser user, String username) {
+    private void uploadImageAndStoreUser(FirebaseUser user, String username, String selectedGender) {
         if (selectedImageUri != null) {
             // Upload the image to Firebase Storage
             StorageReference imageRef = storageReference.child("avatars/" + UUID.randomUUID().toString());
@@ -239,31 +258,31 @@ public class RegisterActivity extends AppCompatActivity {
                     imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
                         String imageUrl = uri.toString();
                         // Store user info with image URL in Firestore
-                        storeUserInfo(user, username, imageUrl);
+                        storeUserInfo(user, username, imageUrl, selectedGender);
                     }).addOnFailureListener(e -> {
                         Log.e(TAG, "Failed to get download URL", e);
-                        storeUserInfo(user, username, String.valueOf(DEFAULT_AVATAR_RESOURCE));
+                        storeUserInfo(user, username, String.valueOf(DEFAULT_AVATAR_RESOURCE),selectedGender);
                     });
                 }).addOnFailureListener(e -> {
                     Log.e(TAG, "Image upload failed", e);
                     Toast.makeText(RegisterActivity.this, "Image upload failed: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show();
-                    storeUserInfo(user, username, String.valueOf(DEFAULT_AVATAR_RESOURCE));
+                    storeUserInfo(user, username, String.valueOf(DEFAULT_AVATAR_RESOURCE),selectedGender);
                 });
             } else {
                 Log.w(TAG, "Bitmap is null, using default avatar");
-                storeUserInfo(user, username, String.valueOf(DEFAULT_AVATAR_RESOURCE));
+                storeUserInfo(user, username, String.valueOf(DEFAULT_AVATAR_RESOURCE),selectedGender);
             }
         } else {
             // No image selected, store user info with a default image URL in Firestore
-            storeUserInfo(user, username, String.valueOf(DEFAULT_AVATAR_RESOURCE));
+            storeUserInfo(user, username, String.valueOf(DEFAULT_AVATAR_RESOURCE),selectedGender);
         }
     }
 
     // Store User Info in Firestore
-    private void storeUserInfo(FirebaseUser user, String username, String imageUrl) {
+    private void storeUserInfo(FirebaseUser user, String username, String imageUrl, String selectedGender) {
         String userId = user.getUid();
-        User newUser = new User(username, user.getEmail(), imageUrl); // Assuming you have a User class
+        User newUser = new User(username, user.getEmail(), imageUrl, selectedGender);
 
         db.collection("users")
                 .document(userId)

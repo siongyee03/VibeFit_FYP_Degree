@@ -15,18 +15,13 @@
         <!-- Exit Button -->
         <ImageButton
             android:id="@+id/btn_back"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:layout_marginTop="16dp"
             android:background="@drawable/ic_arrow_back"
-            android:src="@drawable/ic_arrow_back"
             android:scaleType="center"
             android:contentDescription="@string/back_button"
             />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="40dp" />
 
         <!-- Avatar with Add Photo Button -->
         <FrameLayout
@@ -36,6 +31,15 @@
             android:layout_marginTop="32dp"
             android:layout_marginBottom="32dp">
 
+            <androidx.cardview.widget.CardView
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center"
+                android:layout_margin="32dp"
+                app:cardCornerRadius="75dp"
+                app:cardElevation="6dp"
+                app:cardBackgroundColor="@android:color/white"
+                app:strokeWidth="3dp">
             <!-- Avatar -->
             <ImageView
                 android:id="@+id/avatar"
@@ -47,6 +51,7 @@
                 android:contentDescription="@string/avatar_description"
                 android:clickable="true"
                 android:focusable="true"/>
+            </androidx.cardview.widget.CardView>
 
             <!-- Add Photo Button wrapped in CardView -->
             <androidx.cardview.widget.CardView
@@ -78,16 +83,10 @@
             android:id="@+id/regisUsername"
             android:layout_width="match_parent"
             android:layout_height="57dp"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="0dp"
             android:autofillHints="username"
             android:hint="@string/username"
-            android:inputType="text"
-            android:textColor="#000000"
-            android:textColorHint="#FF888888"
-            android:textSize="20sp"
-            android:background="@drawable/edittext_bg"
-            android:padding="12dp"
-            android:typeface="monospace"/>
+            android:inputType="text" />
 
         <!-- Email -->
         <EditText
@@ -97,13 +96,7 @@
             android:layout_marginTop="16dp"
             android:autofillHints="new-email"
             android:hint="@string/email"
-            android:textColor="#000000"
-            android:textColorHint="#FF888888"
-            android:textSize="20sp"
-            android:background="@drawable/edittext_bg"
-            android:padding="12dp"
-            android:inputType="textEmailAddress"
-            android:typeface="monospace"/>
+            android:inputType="textEmailAddress" />
 
         <!-- Password -->
         <RelativeLayout
@@ -117,13 +110,7 @@
                 android:layout_height="match_parent"
                 android:autofillHints="password"
                 android:hint="@string/password"
-                android:textColor="#000000"
-                android:textColorHint="#FF888888"
-                android:textSize="20sp"
-                android:background="@drawable/edittext_bg"
-                android:padding="12dp"
-                android:inputType="textPassword"
-                android:typeface="monospace"/>
+                android:inputType="textPassword" />
 
             <ImageView
                 android:id="@+id/iv_toggle_password"
@@ -148,14 +135,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:hint="@string/cfpassword"
-                android:textColor="#000000"
-                android:textColorHint="#FF888888"
-                android:textSize="20sp"
-                android:background="@drawable/edittext_bg"
-                android:padding="12dp"
                 android:inputType="textPassword"
-                android:autofillHints="new-password"
-                android:typeface="monospace" />
+                android:autofillHints="new-password"/>
 
             <ImageView
                 android:id="@+id/iv_toggle_confirm_password"
@@ -169,6 +150,19 @@
                 app:tint="#99000000" />
         </RelativeLayout>
 
+        <!-- Gender Spinner -->
+        <Spinner
+            android:id="@+id/spinner_gender"
+            android:layout_width="match_parent"
+            android:layout_height="57dp"
+            android:layout_marginTop="16dp"
+            android:spinnerMode="dropdown"
+            android:prompt="@string/select_gender"
+            android:background="@drawable/edittext_bg"
+            style="@style/FontRobotoMonoRegular"
+            android:paddingStart="0dp"
+            android:paddingEnd="16dp"/>
+
         <!-- Register Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_register"
@@ -177,9 +171,9 @@
             android:layout_marginTop="32dp"
             style="@style/ButtonStyle"
             android:text="@string/register"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="20sp"
-            android:typeface="monospace"
+            android:fontFamily="@font/roboto_mono_regular"
             android:textAllCaps="true"/>
 
         <!-- Already Have Account -->
@@ -194,9 +188,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/already_have_acc"
-                android:textColor="#000000"
+                android:textColor="@color/black_text"
                 android:textSize="16sp"
-                android:typeface="monospace"
+                android:fontFamily="@font/roboto_mono_regular"
                 android:layout_marginEnd="8dp"/>
 
             <TextView
@@ -204,9 +198,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/login_now"
-                android:textColor="#7C4DFF"
+                android:textColor="@color/purple_main"
                 android:textSize="16sp"
-                android:typeface="monospace" />
+                android:fontFamily="@font/roboto_mono_regular" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

@@ -4,6 +4,7 @@ public class User {
     private String username;
     private String email;
     private String profileImageUrl;
+    private String gender;
 
     public User() {
         // Default constructor required for Firebase Firestore
@@ -18,6 +19,11 @@ public class User {
         this.username = username;
         this.email = email;
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public User(String username, String email, String profileImageUrl, String gender) {
+        this(username, email, profileImageUrl);
+        this.gender = gender;
     }
 
     public String getUsername() {
@@ -43,8 +49,14 @@ public class User {
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }
+    public String getGender() {
+        return gender;
+    }
 
-    // 添加一个方法来判断是否是资源 ID
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
     public boolean isDefaultAvatar() {
         try {
             Integer.parseInt(profileImageUrl);

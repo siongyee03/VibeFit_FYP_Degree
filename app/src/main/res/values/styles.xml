@@ -6,4 +6,34 @@
         <item name="android:textColor">@android:color/white</item>
         <item name="cornerRadius">8dp</item>
     </style>
+
+    <!-- Base TextStyles -->
+    <style name="FontRobotoMonoRegular">
+        <item name="android:fontFamily">@font/roboto_mono_regular</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/black_text</item>
+    </style>
+
+    <style name="FontRobotoRegular">
+        <item name="android:fontFamily">@font/roboto_regular</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/black_text</item>
+    </style>
+
+    <style name="TabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/roboto_regular</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="EditTextStyle" parent="Widget.MaterialComponents.TextInputEditText.FilledBox">
+        <item name="android:background">@drawable/edittext_bg</item>
+        <item name="android:textColor">@color/black_text</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColorHint">#FF888888</item>
+        <item name="android:fontFamily">@font/roboto_mono_regular</item>
+    </style>
+
 </resources>
