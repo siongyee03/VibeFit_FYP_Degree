@@ -2,16 +2,17 @@ package com.example.vibefitapp;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -19,13 +20,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-
-import java.util.Locale;
 
 public class ClosetFragment extends Fragment {
 
@@ -38,9 +36,7 @@ public class ClosetFragment extends Fragment {
     private TextView heightData;
     private TextView weightData;
     private TextView shoeSizeData;
-    private TextView braSizeData;
-    private ImageButton editButton;
-    private ImageButton deleteButton;
+    private TextView braSizeData,braSizeText;
 
     // B-card views
     private TextView shoulderData;
@@ -48,7 +44,7 @@ public class ClosetFragment extends Fragment {
     private TextView bustData;
     private TextView waistData;
     private TextView hipData;
-    private TextView footLengthData;
+    private TextView footLengthData,bodyShapeData,bodyShapeDetailedData;
     private LinearLayout editSizeButton;
 
     // AI Try On button
@@ -57,7 +53,6 @@ public class ClosetFragment extends Fragment {
     // Firebase
     private FirebaseAuth auth;
     private FirebaseFirestore firestore;
-    private FirebaseStorage storage;
 
     @Override
     public View onCreateView(
@@ -68,7 +63,6 @@ public class ClosetFragment extends Fragment {
         // Initialize Firebase
         auth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
-        storage = FirebaseStorage.getInstance();
 
         // Bind views
         scrollView = view.findViewById(R.id.scrollView);
@@ -81,23 +75,26 @@ public class ClosetFragment extends Fragment {
         weightData = view.findViewById(R.id.weightText);
         shoeSizeData = view.findViewById(R.id.shoeSizeText);
         braSizeData = view.findViewById(R.id.braSizeText);
-
-        editButton = view.findViewById(R.id.editButton);
-        deleteButton = view.findViewById(R.id.deleteButton);
+        braSizeText = view.findViewById(R.id.braCuptext);
 
         shoulderData = view.findViewById(R.id.shoulderData);
         armLengthData = view.findViewById(R.id.armLengthData);
         bustData = view.findViewById(R.id.bustData);
         waistData = view.findViewById(R.id.waistData);
         hipData = view.findViewById(R.id.hipData);
+        bodyShapeData = view.findViewById(R.id.bodyShapeData);
+        bodyShapeDetailedData = view.findViewById(R.id.bodyShapeDetailedData);
         footLengthData = view.findViewById(R.id.footLengthData);
 
         editSizeButton = view.findViewById(R.id.editSizeButton);
         aiTryOnButton = view.findViewById(R.id.aiTryOnButton);
 
+        LinearLayout editContainer = view.findViewById(R.id.editContainer);
+        LinearLayout deleteContainer = view.findViewById(R.id.deleteContainer);
+
         // Setup listeners
-        editButton.setOnClickListener(v -> openEditProfile());
-        deleteButton.setOnClickListener(v -> deleteProfileData());
+        editContainer.setOnClickListener(v -> openEditProfile());
+        deleteContainer.setOnClickListener(v -> deleteProfileData());
         editSizeButton.setOnClickListener(v -> openEditSizes());
         aiTryOnButton.setOnClickListener(v -> openAiTryOn());
 
@@ -107,93 +104,143 @@ public class ClosetFragment extends Fragment {
     }
 
     private void loadUserData() {
-        FirebaseUser user = auth.getCurrentUser();
-        if (user == null) {
-            // Not logged in, show placeholder or prompt login
+        FirebaseUser firebaseUser = auth.getCurrentUser();
+        if (firebaseUser == null) {
             showLoginRequiredDialog();
 
-            genderText.setText("-");
-            heightData.setText("-");
-            weightData.setText("-");
-            shoeSizeData.setText("-");
-            braSizeData.setText("-");
+            genderText.setText("--");
+            heightData.setText("--");
+            weightData.setText("--");
+            shoeSizeData.setText("--");
+            braSizeData.setText("--");
 
-            shoulderData.setText("-");
-            armLengthData.setText("-");
-            bustData.setText("-");
-            waistData.setText("-");
-            hipData.setText("-");
-            footLengthData.setText("-");
+            shoulderData.setText("--");
+            armLengthData.setText("--");
+            bustData.setText("--");
+            waistData.setText("--");
+            hipData.setText("--");
+            bodyShapeData.setText("--");
+            bodyShapeDetailedData.setText("--");
+            footLengthData.setText("--");
 
+            userAvatar.setImageResource(R.drawable.ic_avatar_placeholder);
             return;
         }
 
-        // Load avatar from Firebase Storage, path e.g. "avatars/{uid}.jpg"
-        StorageReference avatarRef = storage.getReference().child("avatars/" + user.getUid() + ".jpg");
-        avatarRef.getDownloadUrl().addOnSuccessListener(uri -> {
-            // Use Glide or similar to load image
-            Glide.with(requireContext()).load(uri).into(userAvatar);
-        }).addOnFailureListener(e -> {
-            // Load default avatar on failure
-            userAvatar.setImageResource(R.drawable.ic_avatar_placeholder);
-        });
-
-        // Load user document from Firestore (collection "users", doc uid)
-        firestore.collection("users").document(user.getUid())
+        firestore.collection("users")
+                .document(firebaseUser.getUid())
                 .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        String gender = documentSnapshot.getString("gender");
+                .addOnSuccessListener(userSnapshot -> {
+                    if (!isAdded()) return;
+
+                    if (userSnapshot.exists()) {
+                        String avatarUrl = userSnapshot.getString("profileImageUrl");
+                        String gender = userSnapshot.getString("gender");
                         setGenderUI(gender);
 
-                        // a-card: height, weight, shoeSize, braSize
-                        Number height = documentSnapshot.getDouble("height");
-                        Number weight = documentSnapshot.getDouble("weight");
-                        Number shoeSize = documentSnapshot.getDouble("shoeSize");
-                        Number braSize = documentSnapshot.getDouble("braSize");
-
-                        heightData.setText(height != null ? String.format(Locale.US, "%.0f cm", height.doubleValue()) : "-");
-                        weightData.setText(weight != null ? String.format(Locale.US, "%.0f kg", weight.doubleValue()) : "-");
-                        shoeSizeData.setText(shoeSize != null ? String.format(Locale.US, "%.0f", shoeSize.doubleValue()) : "-");
-                        braSizeData.setText(braSize != null ? String.format(Locale.US, "%.0f", braSize.doubleValue()) : "-");
-
-                        // b-card: shoulderWidth, armLength, bust, waist, hip, footLength
-                        Number shoulder = documentSnapshot.getDouble("shoulderWidth");
-                        Number armLength = documentSnapshot.getDouble("armLength");
-                        Number bust = documentSnapshot.getDouble("bust");
-                        Number waist = documentSnapshot.getDouble("waist");
-                        Number hip = documentSnapshot.getDouble("hip");
-                        Number footLength = documentSnapshot.getDouble("footLength");
-
-                        shoulderData.setText(shoulder != null ? String.format(Locale.US, "%.0f cm", shoulder.doubleValue()) : "-");
-                        armLengthData.setText(armLength != null ? String.format(Locale.US, "%.0f cm", armLength.doubleValue()) : "-");
-                        bustData.setText(bust != null ? String.format(Locale.US, "%.0f cm", bust.doubleValue()) : "-");
-                        waistData.setText(waist != null ? String.format(Locale.US, "%.0f cm", waist.doubleValue()) : "-");
-                        hipData.setText(hip != null ? String.format(Locale.US, "%.0f cm", hip.doubleValue()) : "-");
-                        footLengthData.setText(footLength != null ? String.format(Locale.US, "%.0f cm", footLength.doubleValue()) : "-");
-
+                        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+                            Glide.with(requireContext())
+                                    .load(avatarUrl)
+                                    .apply(RequestOptions.circleCropTransform())
+                                    .into(userAvatar);
+                        } else {
+                            Uri photoUrl = firebaseUser.getPhotoUrl();
+                            if (photoUrl != null) {
+                                Glide.with(requireContext())
+                                        .load(photoUrl)
+                                        .apply(RequestOptions.circleCropTransform())
+                                        .into(userAvatar);
+                            } else {
+                                userAvatar.setImageResource(R.drawable.ic_avatar_placeholder);
+                            }
+                        }
                     } else {
-                        Toast.makeText(requireContext(), "User data not found", Toast.LENGTH_SHORT).show();
+                        userAvatar.setImageResource(R.drawable.ic_avatar_placeholder);
                     }
                 })
-                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Failed to load user data", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> {
+                    Toast.makeText(requireContext(), getString(R.string.user_data_load_failed), Toast.LENGTH_SHORT).show();
+                    userAvatar.setImageResource(R.drawable.ic_avatar_placeholder);
+                });
+
+        firestore.collection("users")
+                .document(firebaseUser.getUid())
+                .collection("size_profile")
+                .document("detailed")
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists()) {
+                        heightData.setText("--");
+                        weightData.setText("--");
+                        shoeSizeData.setText("--");
+                        braSizeData.setText("--");
+
+                        shoulderData.setText("--");
+                        armLengthData.setText("--");
+                        bustData.setText("--");
+                        waistData.setText("--");
+                        hipData.setText("--");
+                        bodyShapeData.setText("--");
+                        bodyShapeDetailedData.setText("--");
+                        footLengthData.setText("--");
+                        return;
+                    }
+
+                    String bandSize = documentSnapshot.getString("braBandSize");
+                    String cupSize = documentSnapshot.getString("braCup");
+                    String formattedBraSize = getString(R.string.bra_size_format, bandSize, cupSize);
+                    braSizeData.setText(formattedBraSize);
+
+                    heightData.setText(formatWithUnit(documentSnapshot.getString("height"), "Cm"));
+                    weightData.setText(formatWithUnit(documentSnapshot.getString("weight"), "Kg"));
+                    shoeSizeData.setText(formatPlain(documentSnapshot.getString("shoeSize")));
+
+                    shoulderData.setText(formatWithUnit(documentSnapshot.getString("shoulder"), "Cm"));
+                    armLengthData.setText(formatWithUnit(documentSnapshot.getString("armLength"), "Cm"));
+                    bustData.setText(formatWithUnit(documentSnapshot.getString("bust"), "Cm"));
+                    waistData.setText(formatWithUnit(documentSnapshot.getString("waist"), "Cm"));
+                    hipData.setText(formatWithUnit(documentSnapshot.getString("hip"), "Cm"));
+                    bodyShapeData.setText(formatPlain(documentSnapshot.getString("bodyShape")));
+                    bodyShapeDetailedData.setText(formatPlain(documentSnapshot.getString("mainShape")));
+                    footLengthData.setText(formatWithUnit(documentSnapshot.getString("footLength"), "Cm"));
+
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(requireContext(), getString(R.string.add_size_profile), Toast.LENGTH_SHORT).show()
+                );
+    }
+
+    private String formatWithUnit(String value, String unit) {
+        return (value != null && !value.trim().isEmpty()) ? value + " " + unit : "--";
+    }
+
+    private String formatPlain(String value) {
+        return (value != null && !value.trim().isEmpty()) ? value : "--";
     }
 
     private void setGenderUI(String gender) {
+        if (!isAdded()) return;
+
         if (gender == null || gender.isEmpty()) {
             gender = "unknown";
         }
-        genderText.setText(getString(R.string.me));
 
         switch (gender.toLowerCase()) {
             case "male":
                 genderIcon.setImageResource(R.drawable.ic_male_symbol);
+                genderText.setText(getString(R.string.male));
+                braSizeData.setVisibility(View.GONE);
+                braSizeText.setVisibility(View.GONE);
                 break;
             case "female":
-                genderIcon.setImageResource(R.drawable.ic_female_symbol); // your female icon drawable
+                genderIcon.setImageResource(R.drawable.ic_female_symbol);
+                genderText.setText(getString(R.string.female));
+                braSizeData.setVisibility(View.VISIBLE);
+                braSizeText.setVisibility(View.VISIBLE);
                 break;
             default:
-                genderIcon.setImageResource(R.drawable.ic_unknown); // unknown icon
+                genderIcon.setImageResource(R.drawable.ic_unknown);
+                genderText.setText(getString(R.string.unknown));
                 break;
         }
     }
@@ -207,47 +254,57 @@ public class ClosetFragment extends Fragment {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) return;
 
-        firestore.collection("users").document(user.getUid())
+        firestore.collection("users").document(user.getUid()).collection("size_profile").document("detailed")
                 .update(
                         "height", null,
                         "weight", null,
                         "shoeSize", null,
                         "braSize", null,
-                        "shoulderWidth", null,
+                        "shoulder", null,
                         "armLength", null,
                         "bust", null,
                         "waist", null,
                         "hip", null,
+                        "mainShape",null,
+                        "bodyShape",null,
                         "footLength", null)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(requireContext(), "Size Profile data deleted", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), getString(R.string.size_profile_deleted), Toast.LENGTH_SHORT).show();
                     loadUserData();
                 })
-                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Failed to delete data", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> Toast.makeText(requireContext(), getString(R.string.size_profile_delete_failed), Toast.LENGTH_SHORT).show());
     }
 
     private void openEditSizes() {
-        // Open Edit Sizes Activity (for b-card)
         Intent intent = new Intent(requireContext(), EditSizesActivity.class);
         startActivity(intent);
     }
 
     private void openAiTryOn() {
-        // Open AI Try On Activity
         Intent intent = new Intent(requireContext(), AiTryOnActivity.class);
         startActivity(intent);
     }
 
     private void showLoginRequiredDialog() {
-        new AlertDialog.Builder(requireContext())
+        Context context = getContext();
+        if (context == null) return;
+
+        new AlertDialog.Builder(context)
                 .setTitle(R.string.login_required_title)
                 .setMessage(R.string.login_required_message)
                 .setCancelable(false)
                 .setPositiveButton(R.string.login, (dialog, which) -> {
-                    Intent intent = new Intent(requireContext(), LoginActivity.class);
+                    Intent intent = new Intent(context, LoginActivity.class);
                     startActivity(intent);
                 })
                 .setNegativeButton(R.string.cancel, (dialog, which) -> dialog.dismiss())
                 .show();
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadUserData();
+    }
+
 }

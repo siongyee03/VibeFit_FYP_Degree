@@ -13,15 +13,4 @@
         android:scaleType="fitCenter"
         android:contentDescription="@string/preview_image" />
 
-    <Button
-        android:id="@+id/edit_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:maxWidth="320dp"
-        android:text="@string/edit_media"
-        android:layout_marginTop="12dp"
-        android:backgroundTint="@color/purple_main"
-        android:textColor="@android:color/white"
-        android:padding="12dp" />
-
-</LinearLayout>
+    </LinearLayout>

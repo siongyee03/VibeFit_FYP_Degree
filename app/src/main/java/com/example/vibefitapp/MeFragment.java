@@ -1,64 +1,148 @@
 package com.example.vibefitapp;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link MeFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+
 public class MeFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private ImageView imgUserAvatar;
+    private TextView tvUsername;
+    private ConstraintLayout cardUserInfo, cardFavourite, cardSettings;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private FirebaseAuth firebaseAuth;
+    private ListenerRegistration userListener;
 
     public MeFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MeFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static MeFragment newInstance(String param1, String param2) {
-        MeFragment fragment = new MeFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_me, container, false);
+
+        firebaseAuth = FirebaseAuth.getInstance();
+
+        imgUserAvatar = view.findViewById(R.id.imgUserAvatar);
+        tvUsername = view.findViewById(R.id.tvUsername);
+
+        cardUserInfo = view.findViewById(R.id.cardUserInfo);
+        cardFavourite = view.findViewById(R.id.cardFavourite);
+        cardSettings = view.findViewById(R.id.cardSettings);
+
+        setupUserInfoListener();
+        setupCardsClick();
+
+        return view;
+    }
+
+    private void setupUserInfoListener() {
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser != null) {
+            String uid = currentUser.getUid();
+            FirebaseFirestore.getInstance().collection("users").document(uid)
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            String imageUrl = documentSnapshot.getString("profileImageUrl");
+                            String username = documentSnapshot.getString("username");
+
+                            if (imageUrl != null && !imageUrl.isEmpty()) {
+                                Glide.with(this)
+                                        .load(imageUrl)
+                                        .placeholder(R.drawable.ic_avatar_placeholder)
+                                        .circleCrop()
+                                        .into(imgUserAvatar);
+                            } else {
+                                imgUserAvatar.setImageResource(R.drawable.ic_avatar_placeholder);
+                            }
+
+                            if (username != null && !username.isEmpty()) {
+                                tvUsername.setText(username);
+                            } else {
+                                tvUsername.setText("Anonymous");
+                            }
+                        } else {
+                            showDefaultUserInfo();
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        showDefaultUserInfo();
+                    });
+        } else {
+            showDefaultUserInfo();
+        }
+    }
+
+    private void showDefaultUserInfo() {
+        imgUserAvatar.setImageResource(R.drawable.ic_avatar_placeholder);
+        tvUsername.setText(R.string.anonymous);
+    }
+
+    private void setupCardsClick() {
+        cardUserInfo.setOnClickListener(v -> {
+            if (firebaseAuth.getCurrentUser() != null) {
+                Intent intent = new Intent(requireContext(), UserProfileActivity.class);
+                startActivity(intent);
+            } else {
+                Toast.makeText(requireContext(), R.string.please_log_in_first, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        cardFavourite.setOnClickListener(v -> {
+            if (firebaseAuth.getCurrentUser() != null) {
+                Intent intent = new Intent(requireContext(), FavouritePostsActivity.class);
+                startActivity(intent);
+            } else {
+                Toast.makeText(requireContext(), R.string.please_log_in_first, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        cardSettings.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), SettingsActivity.class);
+            startActivity(intent);
+        });
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    public void onPause() {
+        super.onPause();
+        if (userListener != null) {
+            userListener.remove();
+            userListener = null;
         }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_me, container, false);
+    public void onResume() {
+        super.onResume();
+        setupUserInfoListener();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (userListener != null) {
+            userListener.remove();
+            userListener = null;
+        }
     }
 }

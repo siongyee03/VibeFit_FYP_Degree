@@ -20,6 +20,9 @@ android {
 
         val unsplashApiKey: String = project.findProperty("UNSPLASH_API_KEY") as String
         buildConfigField("String", "UNSPLASH_API_KEY", "\"$unsplashApiKey\"")
+
+        val tryOnApikey = project.findProperty("VIRTUAL_TRYON_API_KEY")?.toString() ?: ""
+        buildConfigField("String", "VIRTUAL_TRYON_API_KEY", "\"$tryOnApikey\"")
     }
 
     buildTypes {
@@ -41,6 +44,10 @@ android {
     }
 }
 
+tasks.withType<JavaCompile>().configureEach {
+    options.compilerArgs.add("-Xlint:deprecation")
+}
+
 dependencies {
 
     implementation(libs.appcompat)
@@ -49,6 +56,8 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
+    implementation ("androidx.recyclerview:recyclerview:1.4.0")
+    implementation(libs.firebase.appcheck.playintegrity)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -59,9 +68,9 @@ dependencies {
     implementation ("com.google.firebase:firebase-firestore")
     implementation ("com.google.firebase:firebase-storage")
     // Add the dependency for the Vertex AI in Firebase library
-    implementation("com.google.firebase:firebase-vertexai")
+    implementation("com.google.firebase:firebase-ai")
     // Required for one-shot operations (to use `ListenableFuture` from Guava Android)
-    implementation("com.google.guava:guava:32.1.3-android")
+    implementation("com.google.guava:guava:31.0.1-android")
     // Required for streaming operations (to use `Publisher` from Reactive Streams)
     implementation("org.reactivestreams:reactive-streams:1.0.4")
     implementation("com.google.firebase:firebase-appcheck:18.0.0") // Use the latest version
@@ -70,11 +79,10 @@ dependencies {
     implementation ("androidx.cardview:cardview:1.0.0")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
-    implementation ("com.google.android.material:material:1.12.0")
+    implementation (libs.material.v1120)
 
     implementation ("com.github.chrisbanes:PhotoView:2.3.0") // Picture Zooming
 
-    implementation ("com.github.MasayukiSuda:Mp4Composer-android:v0.4.1")
-
-    implementation ("com.github.yalantis:ucrop:2.2.10") // UCrop library for cropping
+    //noinspection Aligned16KB
+    implementation ("com.squareup.okhttp3:okhttp:4.12.0")
 }

@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.*;
 
@@ -21,15 +22,15 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.*;
+import android.text.Editable;
+import android.text.TextWatcher;
 
 public class UploadPostActivity extends AppCompatActivity {
 
     private static final int MAX_IMAGE_COUNT = 9;
-    private Uri videoUri = null;
     private final List<Uri> imageUris = new ArrayList<>();
     private RecyclerView imageRecycler;
     private VideoView previewVideo;
-    private ImageView addMoreImageButton;
     private EditText titleInput, descriptionInput;
     private Spinner categorySpinner;
     private ProgressBar uploadProgress;
@@ -38,9 +39,12 @@ public class UploadPostActivity extends AppCompatActivity {
     private FirebaseStorage storage;
     private FirebaseFirestore firestore;
     private FirebaseAuth auth;
-    private ActivityResultLauncher<Intent> mediaEditLauncher;
     private ActivityResultLauncher<Intent> mediaPickerLauncher;
     private ImagePreviewAdapter adapter;
+    private boolean isEditMode = false;
+    private String editingPostId = null;
+    private Post editingPost;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +53,6 @@ public class UploadPostActivity extends AppCompatActivity {
 
         imageRecycler = findViewById(R.id.image_recycler);
         previewVideo = findViewById(R.id.previewVideo);
-        addMoreImageButton = findViewById(R.id.add_more_image_button);
         titleInput = findViewById(R.id.title_input);
         descriptionInput = findViewById(R.id.description_input);
         categorySpinner = findViewById(R.id.category_spinner);
@@ -69,24 +72,22 @@ public class UploadPostActivity extends AppCompatActivity {
                 this,
                 imageUris,
                 position -> {
+                    if (imageUris.size() == 1) {
+                        Toast.makeText(this, "At least one image is required.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     imageUris.remove(position);
                     adapter.notifyItemRemoved(position);
                 },
-                this::showImagePreviewDialog
+                this::showImagePreviewDialog,
+                this::selectMedia
         );
-        imageRecycler.setAdapter(adapter);
-
 
         Intent intent = getIntent();
         if (intent != null) {
-            String videoUriStr = intent.getStringExtra("video_uri");
             ArrayList<String> imageUriStrs = intent.getStringArrayListExtra("image_uris");
 
-            if (videoUriStr != null) {
-                videoUri = Uri.parse(videoUriStr);
-                imageUris.clear();
-            } else if (imageUriStrs != null && !imageUriStrs.isEmpty()) {
-                videoUri = null;
+            if (imageUriStrs != null && !imageUriStrs.isEmpty()) {
                 imageUris.clear();
                 for (String uriStr : imageUriStrs) {
                     imageUris.add(Uri.parse(uriStr));
@@ -96,27 +97,8 @@ public class UploadPostActivity extends AppCompatActivity {
 
         updateMediaPreview();
 
-        addMoreImageButton.setOnClickListener(v -> {
-            if (videoUri != null) {
-                Toast.makeText(this, "Video posts cannot add more images.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            selectMedia();
-        });
-
         postButton.setOnClickListener(v -> uploadPost());
         backButton.setOnClickListener(v -> finish());
-
-        Button editButton = findViewById(R.id.edit_media_button);
-        editButton.setOnClickListener(v -> {
-            if (videoUri != null) {
-                launchEditor(videoUri);
-            } else if (!imageUris.isEmpty()) {
-                showImageSelectionDialog();
-            } else {
-                Toast.makeText(this, "Please select media", Toast.LENGTH_SHORT).show();
-            }
-        });
 
 
         // Optional: auto-suggest category from originating tab
@@ -125,128 +107,124 @@ public class UploadPostActivity extends AppCompatActivity {
             suggestCategory(sourceTab);
         }
 
-        mediaEditLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        String newPath = result.getData().getStringExtra(MediaEditActivity.RESULT_MEDIA_PATH);
-                        int editIndex = result.getData().getIntExtra("edit_index", -1);
-
-                        if (newPath != null) {
-                            Uri newUri = Uri.parse(newPath);
-                            if (checkIfVideo(newPath)) {
-                                videoUri = newUri;
-                                imageUris.clear();
-                            } else {
-                                RecyclerView.Adapter<?> adapter = imageRecycler.getAdapter();
-                                if (editIndex >= 0 && editIndex < imageUris.size()) {
-                                    imageUris.set(editIndex, newUri);
-                                    if (adapter != null) {
-                                        adapter.notifyItemChanged(editIndex);
-                                    }
-                                } else {
-                                    imageUris.clear();
-                                    imageUris.add(newUri);
-                                    if (adapter != null) {
-                                        adapter.notifyItemInserted(0);
-                                    }
-                                }
-                                updateMediaPreview();
-                            }
-                        }
-                    }
-                }
-        );
-
         mediaPickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Intent data = result.getData();
+                        Uri uri = data.getData();
+                        if (uri == null) return;
+                        String type = getContentResolver().getType(uri);
 
-                        if (data.getClipData() != null) {
-                            int count = data.getClipData().getItemCount();
-                            for (int i = 0; i < count && imageUris.size() < MAX_IMAGE_COUNT; i++) {
-                                Uri uri = data.getClipData().getItemAt(i).getUri();
-                                String type = getContentResolver().getType(uri);
-                                if (type != null && type.startsWith("image")) {
-                                    imageUris.add(uri);
-                                }
-                            }
-                        } else if (data.getData() != null) {
-                            Uri uri = data.getData();
-                            String type = getContentResolver().getType(uri);
-                            if (type != null && type.startsWith("image")) {
+                        if (type != null && type.startsWith("image")) {
+                            if (imageUris.size() < MAX_IMAGE_COUNT) {
                                 imageUris.add(uri);
                             }
                         }
+
                         updateMediaPreview();
                     }
                 }
         );
-    }
 
-    private void launchEditor(Uri mediaUri) {
-        Intent intent = new Intent(this, MediaEditActivity.class);
-        intent.putExtra(MediaEditActivity.EXTRA_MEDIA_URI, mediaUri);
-        intent.putExtra(MediaEditActivity.EXTRA_IS_VIDEO, true);
-        mediaEditLauncher.launch(intent);
-    }
+        titleInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.toString().trim().isEmpty()) {
+                    titleInput.setError("Title cannot be empty");
+                } else {
+                    titleInput.setError(null);
+                }
+            }
 
-    private void showImageSelectionDialog() {
-        String[] imageNames = new String[imageUris.size()];
-        for (int i = 0; i < imageUris.size(); i++) {
-            imageNames[i] = "Image " + (i + 1);
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
+        descriptionInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.toString().trim().isEmpty()) {
+                    descriptionInput.setError("Description cannot be empty");
+                } else {
+                    descriptionInput.setError(null);
+                }
+            }
+
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
+        //edit post
+        Post editingPost = getIntent().getParcelableExtra("editing_post");
+        if (editingPost != null) {
+            isEditMode = true;
+            this.editingPost = editingPost;
+            editingPostId = editingPost.getId();
+
+            titleInput.setText(editingPost.getTitle());
+            descriptionInput.setText(editingPost.getContent());
+
+            String category = editingPost.getCategory();
+            if (category != null) {
+                SpinnerAdapter rawAdapter = categorySpinner.getAdapter();
+                if (rawAdapter instanceof ArrayAdapter) {
+                    @SuppressWarnings("unchecked")
+                    ArrayAdapter<String> adapterSpinner = (ArrayAdapter<String>) rawAdapter;
+                    int pos = adapterSpinner.getPosition(category);
+                    if (pos >= 0) categorySpinner.setSelection(pos);
+                }
+            }
+
+            List<String> mediaUrls = editingPost.getMediaUrls();
+            if (editingPost.getMediaType() != null && editingPost.getMediaType().equals("video")) {
+                if (!mediaUrls.isEmpty()) {
+                    imageUris.clear();
+                }
+            } else {
+                imageUris.clear();
+                for (String url : mediaUrls) {
+                    imageUris.add(Uri.parse(url));
+                }
+            }
+
+            updateMediaPreview();
+
+            postButton.setText(getString(R.string.update_post));
+
+            imageRecycler.setVisibility(View.GONE);
         }
-
-        new AlertDialog.Builder(this)
-                .setTitle("Select the image to be edited.")
-                .setItems(imageNames, (dialog, which) -> {
-                    Uri selectedUri = imageUris.get(which);
-                    Intent intent = new Intent(this, MediaEditActivity.class);
-                    intent.putExtra(MediaEditActivity.EXTRA_MEDIA_URI, selectedUri);
-                    intent.putExtra(MediaEditActivity.EXTRA_IS_VIDEO, false);
-                    intent.putExtra("edit_index", which);
-                    mediaEditLauncher.launch(intent);
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
     }
 
     private void showImagePreviewDialog(int position) {
         Uri imageUri = imageUris.get(position);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_image_preview, null);
         ImageView imageView = dialogView.findViewById(R.id.preview_image);
-        Button editButton = dialogView.findViewById(R.id.edit_button);
         imageView.setImageURI(imageUri);
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setView(dialogView)
                 .create();
-
-        editButton.setOnClickListener(v -> {
-            dialog.dismiss();
-            Intent intent = new Intent(this, MediaEditActivity.class);
-            intent.putExtra(MediaEditActivity.EXTRA_MEDIA_URI, imageUri);
-            intent.putExtra(MediaEditActivity.EXTRA_IS_VIDEO, false);
-            intent.putExtra("edit_index", position);
-            mediaEditLauncher.launch(intent);
-        });
-
         dialog.show();
     }
 
-
     private void setupCategorySpinner() {
+        List<String> categories = Arrays.asList("Tutorial", "Pattern Guide", "Forum");
+
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_dropdown_item,
-                Arrays.asList("Tutorial", "Pattern", "Forum")
+                categories
         );
         categorySpinner.setAdapter(adapter);
+
+        String sourceTab = getIntent().getStringExtra("source_tab");
+        suggestCategory(sourceTab);
     }
 
     private void suggestCategory(String tab) {
+        if (tab == null) return;
+
         switch (tab.toLowerCase()) {
             case "explore":
                 categorySpinner.setSelection(0); // Tutorial
@@ -254,59 +232,130 @@ public class UploadPostActivity extends AppCompatActivity {
             case "forum":
                 categorySpinner.setSelection(2); // Forum
                 break;
+            default:
+                categorySpinner.setSelection(0);
+                break;
         }
     }
 
+
     private void selectMedia() {
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("image/*");
+        if (isEditMode) {
+            Toast.makeText(this, "Editing mode: cannot add new media, only delete existing ones.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         mediaPickerLauncher.launch(intent);
     }
 
-
     private void uploadPost() {
-        if ((imageUris.isEmpty() && videoUri == null) || titleInput.getText().toString().isEmpty()) {
-            Toast.makeText(this, "Please select media and enter title.", Toast.LENGTH_SHORT).show();
+        if (!postButton.isEnabled()) return;
+        postButton.setEnabled(false);
+
+        String title = titleInput.getText().toString().trim();
+        String description = descriptionInput.getText().toString().trim();
+
+        if (title.isEmpty()) {
+            Toast.makeText(this, "Please enter title.", Toast.LENGTH_SHORT).show();
+            postButton.setEnabled(true);
+            return;
+        }
+
+        if (description.isEmpty()) {
+            Toast.makeText(this, "Please enter description.", Toast.LENGTH_SHORT).show();
+            postButton.setEnabled(true);
+            return;
+        }
+
+        if (imageUris.isEmpty()) {
+            Toast.makeText(this, "Please select media.", Toast.LENGTH_SHORT).show();
+            postButton.setEnabled(true);
             return;
         }
 
         FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser == null) {
             Toast.makeText(this, "You must be logged in to post.", Toast.LENGTH_SHORT).show();
+            postButton.setEnabled(true);
             return;
         }
 
         uploadProgress.setVisibility(View.VISIBLE);
-        postButton.setEnabled(false);
-
         String userId = currentUser.getUid();
-        List<String> uploadedUrls = new ArrayList<>();
-        List<Uri> uploadTargets = videoUri != null ? Collections.singletonList(videoUri) : imageUris;
 
-        uploadRecursive(uploadTargets, 0, uploadedUrls, () -> {
-            Map<String, Object> post = new HashMap<>();
-            post.put("userId", userId);
-            post.put("username", currentUser.getDisplayName());
-            post.put("userAvatar", currentUser.getPhotoUrl() != null ? currentUser.getPhotoUrl().toString() : null);
-            post.put("title", titleInput.getText().toString());
-            post.put("content", descriptionInput.getText().toString());
-            post.put("mediaUrls", uploadedUrls);
-            post.put("mediaType", videoUri != null ? "video" : "image");
-            post.put("category", categorySpinner.getSelectedItem().toString());
-            post.put("timestamp", FieldValue.serverTimestamp());
-            post.put("likeCount", 0);
+        firestore.collection("users").document(userId).get()
+                .addOnSuccessListener(snapshot -> {
+                    String username = snapshot.getString("username");
+                    String avatarUrl = snapshot.getString("profileImageUrl");
 
-            firestore.collection("posts").add(post)
-                    .addOnSuccessListener(ref -> {
-                        Toast.makeText(this, "Upload Successful", Toast.LENGTH_SHORT).show();
-                        finish();
-                    })
-                    .addOnFailureListener(this::showError);
-        });
+                    if (isEditMode) {
+                        Map<String, Object> updates = new HashMap<>();
+                        updates.put("title", title);
+                        updates.put("content", description);
+                        updates.put("category", categorySpinner.getSelectedItem().toString());
+                        List<String> currentMediaUrls = new ArrayList<>();
+
+                            for (Uri uri : imageUris) {
+                                currentMediaUrls.add(uri.toString());
+                            }
+
+                        updates.put("mediaUrls", currentMediaUrls);
+
+                        firestore.collection("posts").document(editingPostId)
+                                .update(updates)
+                                .addOnSuccessListener(aVoid -> {
+                                    uploadProgress.setVisibility(View.GONE);
+                                    Toast.makeText(this, "Post updated successfully.", Toast.LENGTH_SHORT).show();
+                                    finish();
+                                })
+                                .addOnFailureListener(e -> {
+                                    uploadProgress.setVisibility(View.GONE);
+                                    postButton.setEnabled(true);
+                                    Toast.makeText(this, "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
+                    } else {
+                        List<String> uploadedUrls = new ArrayList<>();
+
+                        uploadRecursive(imageUris, 0, uploadedUrls, () -> {
+                            Map<String, Object> post = new HashMap<>();
+                            post.put("userId", userId);
+                            post.put("username", username != null ? username : "Unknown");
+                            post.put("userAvatar", avatarUrl);
+                            post.put("title", title);
+                            post.put("content", description);
+                            post.put("mediaUrls", uploadedUrls);
+                            post.put("mediaType", "image");
+                            post.put("category", categorySpinner.getSelectedItem().toString());
+                            post.put("timestamp", FieldValue.serverTimestamp());
+                            post.put("likeCount", 0);
+                            post.put("favouriteCount", 0);
+
+                            firestore.collection("posts").add(post)
+                                    .addOnSuccessListener(ref -> {
+                                        uploadProgress.setVisibility(View.GONE);
+                                        Toast.makeText(this, "Upload Successful", Toast.LENGTH_SHORT).show();
+                                        Intent intent = new Intent(this, HomeActivity.class);
+                                        intent.putExtra("target_tab", getIntent().getStringExtra("source_tab"));
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        startActivity(intent);
+                                        finish();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        uploadProgress.setVisibility(View.GONE);
+                                        postButton.setEnabled(true);
+                                        Toast.makeText(this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    });
+                        });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    uploadProgress.setVisibility(View.GONE);
+                    postButton.setEnabled(true);
+                });
     }
-
 
     private void uploadRecursive(List<Uri> uris, int index, List<String> urls, Runnable onComplete) {
         if (index >= uris.size()) {
@@ -316,7 +365,8 @@ public class UploadPostActivity extends AppCompatActivity {
 
         Uri uri = uris.get(index);
         String filename = UUID.randomUUID().toString();
-        StorageReference ref = storage.getReference().child("posts/" + auth.getUid() + "/" + filename);
+        String folder = "images";
+        StorageReference ref = storage.getReference().child("posts/" + auth.getUid() + "/" + folder + "/" + filename);
 
         ref.putFile(uri).addOnSuccessListener(task -> ref.getDownloadUrl().addOnSuccessListener(url -> {
             urls.add(url.toString());
@@ -330,23 +380,19 @@ public class UploadPostActivity extends AppCompatActivity {
         Toast.makeText(this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
     }
 
-    private boolean checkIfVideo(String path) {
-        String lower = path.toLowerCase();
-        return lower.endsWith(".mp4") || lower.endsWith(".mov") || lower.endsWith(".avi");
-    }
-
     private void updateMediaPreview() {
-        if (videoUri != null) {
-            previewVideo.setVisibility(View.VISIBLE);
-            imageRecycler.setVisibility(View.GONE);
-            addMoreImageButton.setVisibility(View.GONE);
-            previewVideo.setVideoURI(videoUri);
-            previewVideo.start();
-        } else {
+        if (!imageUris.isEmpty()) {
             previewVideo.setVisibility(View.GONE);
             imageRecycler.setVisibility(View.VISIBLE);
-            addMoreImageButton.setVisibility(View.VISIBLE);
+
+            if (imageRecycler.getAdapter() == null) {
+                imageRecycler.setAdapter(adapter);
+            } else {
+                adapter.notifyDataSetChanged();
+            }
+
+        } else {
+            imageRecycler.setVisibility(View.GONE);
         }
-        findViewById(R.id.edit_media_button).setVisibility(View.VISIBLE);
     }
 }

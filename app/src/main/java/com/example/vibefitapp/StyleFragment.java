@@ -24,16 +24,15 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-// Used by GenerativeModelFutures
-import com.google.firebase.vertexai.type.Content; // Represents user/model message content
-import com.google.firebase.vertexai.type.GenerateContentResponse; // Response from the model
-import com.google.firebase.vertexai.type.Part;
-import com.google.firebase.vertexai.type.TextPart;
-import com.google.firebase.vertexai.type.ImagePart;
-import com.google.firebase.vertexai.type.FinishReason;
-import com.google.firebase.vertexai.type.Candidate;
-
 import androidx.lifecycle.ViewModelProvider;
+
+import com.google.firebase.ai.type.Candidate;
+import com.google.firebase.ai.type.Content;
+import com.google.firebase.ai.type.FinishReason;
+import com.google.firebase.ai.type.GenerateContentResponse;
+import com.google.firebase.ai.type.ImagePart;
+import com.google.firebase.ai.type.Part;
+import com.google.firebase.ai.type.TextPart;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -48,9 +47,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-// Helper for lists
+
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService; // For running tasks asynchronously
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -126,7 +126,6 @@ public class StyleFragment extends Fragment {
                                 userInputEditText.setHint(R.string.send_message);
                             }
                         } else {
-                            // --- Handle the case where imageUri is unexpectedly null ---
                             Log.w(TAG, "Image Uri is null from result data even though data Intent was not null.");
                             Toast.makeText(getContext(), "Could not get image Uri", Toast.LENGTH_SHORT).show();
                             selectedImageBitmap = null; // Ensure it's null
@@ -162,12 +161,11 @@ public class StyleFragment extends Fragment {
             chatRecyclerView.scrollToPosition(viewModel.getMessageList().size() - 1);
         }
 
-        // Set click listeners for buttons
         sendButton.setOnClickListener(v -> sendMessage());
         uploadImageButton.setOnClickListener(v -> pickImage());
 
         if (viewModel.getMessageList().isEmpty()) {
-            addMessage(new ChatMessage("AI", "Hello! I'm your personal fashion assistant. Tell me about your style, body shape, or upload clothing photos, and I'll give you pairing suggestions!", false)); // AI welcome message
+            addMessage(new ChatMessage("AI", "Hello! I'm your personal fashion assistant. Tell me about your style, body shape, or upload clothing photos, and I'll give you pairing suggestions!", false));
         }
         return view;
     }
@@ -207,7 +205,7 @@ public class StyleFragment extends Fragment {
             return Bitmap.createScaledBitmap(original, newWidth, newHeight, true);
         } catch (Exception e) {
             Log.e(TAG, "Error creating scaled bitmap", e);
-            return original; // Return original if scaling fails
+            return original;
         }
     }
 
@@ -218,7 +216,7 @@ public class StyleFragment extends Fragment {
         // --- Handle the user's confirmation for images ---
         if (awaitingImageConfirmation) {
             handlePromptForRecommendation(userInputText);
-            userInputEditText.setText(""); // Clear input field after handling confirmation
+            userInputEditText.setText("");
             return;
         }
 
@@ -228,12 +226,11 @@ public class StyleFragment extends Fragment {
             return;
         }
 
-        // Build the Content object to send to the model
         List<Part> parts = new ArrayList<>();
 
         if (selectedImageBitmap != null) {
             parts.add(new ImagePart(selectedImageBitmap));
-            selectedImageBitmap = null; // Clear the selected image after adding it to the message
+            selectedImageBitmap = null;
             userInputEditText.setHint(R.string.send_message);
         }
 
@@ -257,7 +254,7 @@ public class StyleFragment extends Fragment {
         Content userContent = contentBuilder.build();
 
         // Add the user message to the UI list
-        addMessage(new ChatMessage("You", formatContentForDisplay(userContent), true)); // true indicates user message
+        addMessage(new ChatMessage("You", formatContentForDisplay(userContent), true));
         userInputEditText.setText(""); // Clear the input field
         chatRecyclerView.scrollToPosition(viewModel.getMessageList().size() - 1);
 
@@ -266,7 +263,6 @@ public class StyleFragment extends Fragment {
         addMessage(aiThinkingMessage); // false indicates AI message
         chatRecyclerView.scrollToPosition(viewModel.getMessageList().size() - 1);
 
-        // Update UI state
         isAwaitingResponse = true;
         setControlsEnabled(false); // Disable input controls
 
@@ -302,7 +298,7 @@ public class StyleFragment extends Fragment {
                             if (thinkingMessagePosition != -1) {
                                 currentMessageList.remove(thinkingMessagePosition);
                                 chatAdapter.notifyItemRemoved(thinkingMessagePosition);
-                                thinkingMessageRemoved = true; // Mark placeholder as removed
+                                thinkingMessageRemoved = true;
 
                                 ChatMessage actualAiMessage = new ChatMessage("AI", delta, false);
                                 currentMessageList.add(actualAiMessage); // Add the new message
@@ -317,19 +313,17 @@ public class StyleFragment extends Fragment {
                                 chatRecyclerView.scrollToPosition(currentMessageList.size() - 1);
 
                             } else {
-                                // This case might happen if onNext is called after onComplete/onError cleared things.
                                 Log.w(TAG, "Received delta but AI thinking placeholder not found.");
                                 // If placeholder somehow not found, just add as a new message (less ideal)
-                                if (aiResponseBuilder.length() == 0) { // Only add if this is the very first chunk
+                                if (aiResponseBuilder.length() == 0) {
                                     addMessage(new ChatMessage("AI", delta, false));
-                                    aiResponseBuilder.append(delta); // Start building
-                                } else { // Otherwise, append to the last message if it's AI's
+                                    aiResponseBuilder.append(delta);
+                                } else {
                                     if (!currentMessageList.isEmpty() && !currentMessageList.get(currentMessageList.size() - 1).isUser()) {
                                         ChatMessage lastAiMessage = currentMessageList.get(currentMessageList.size() - 1);
                                         lastAiMessage.setText(lastAiMessage.getText() + delta);
                                         chatAdapter.notifyItemChanged(currentMessageList.size() - 1);
                                     } else {
-                                        // If the last message isn't AI's or list is empty, something is wrong. Add new.
                                         addMessage(new ChatMessage("AI", delta, false));
                                     }
                                     aiResponseBuilder.append(delta); // Continue building
@@ -340,7 +334,6 @@ public class StyleFragment extends Fragment {
                         } else {
 
                             aiResponseBuilder.append(delta);
-                            // Update the text of the *last* AI message in the list
                             if (!currentMessageList.isEmpty() && !currentMessageList.get(currentMessageList.size() - 1).isUser()) {
                                 ChatMessage lastAiMessage = currentMessageList.get(currentMessageList.size() - 1);
                                 lastAiMessage.setText(aiResponseBuilder.toString());
@@ -351,41 +344,35 @@ public class StyleFragment extends Fragment {
                             }
                             chatRecyclerView.scrollToPosition(currentMessageList.size() - 1);
                         }
-                } else {
-                    // Received an empty delta chunk, sometimes happens. Log it but no UI update.
-                    Log.d(TAG, "Received empty delta chunk.");
-                }
-            });
-        }
+                    } else {
+                        Log.d(TAG, "Received empty delta chunk.");
+                    }
+                });
+            }
 
             @Override
             public void onError(Throwable t) {
-                // An error occurred during streaming
                 Log.e(TAG, "Error during AI response streaming", t);
-                // Update UI on the main thread to show the error
+
                 requireActivity().runOnUiThread(() -> {
                     List<ChatMessage> currentMessageList = viewModel.getMessageList();
 
                     int thinkingMessagePosition = currentMessageList.indexOf(currentAiMessage);
 
-                    // Remove the placeholder message
                     if (thinkingMessagePosition != -1) {
                         currentMessageList.remove(thinkingMessagePosition);
                         chatAdapter.notifyItemRemoved(thinkingMessagePosition);
                     }
-                    // Add an error message to the UI
-                    addMessage(new ChatMessage("AI", "Sorry, an error occurred: " + t.getLocalizedMessage(), false));
+                    addMessage(new ChatMessage("AI", "The assistant is thinking too hard—please try again later.", false));
 
-                    // Scroll to the latest message (which is now the error message)
                     chatRecyclerView.scrollToPosition(currentMessageList.size() - 1);
 
-                    // Re-enable controls and reset state
                     setControlsEnabled(true);
                     isAwaitingResponse = false;
-                    awaitingImageConfirmation = false; // Reset image confirmation state on error
-                    lastRecommendationQuery = null; // Clear stored query on error
+                    awaitingImageConfirmation = false;
+                    lastRecommendationQuery = null;
                 });
-                currentSubscription = null; // Clear the subscription reference
+                currentSubscription = null;
             }
 
             @Override
@@ -404,36 +391,37 @@ public class StyleFragment extends Fragment {
                         }
                     }
 
-                    // Get the final AI response text
                     String finalAiResponse = aiResponseBuilder.toString().trim();
 
                     if (finalAiResponse.toLowerCase().contains("would you like") && finalAiResponse.toLowerCase().contains("image")) {
+                        finalAiResponse += "\n\nJust let me know if you'd like to see related pictures! 😊";
                         awaitingImageConfirmation = true;
-                        // Attempt to extract the core fashion recommendation query from the AI's response.
+
                         lastRecommendationQuery = extractPotentialImageQueryFromAIResponse(finalAiResponse);
                         if (lastRecommendationQuery == null || lastRecommendationQuery.isEmpty()) {
-                            // Fallback: if extraction failed, maybe use the last user input text as a query?
+
+                            lastRecommendationQuery = userInputEditText.getText().toString();
                             Log.w(TAG, "Failed to extract a specific image query from AI response. Awaiting confirmation for general query.");
                         }
                         Log.d(TAG, "AI asked for image confirmation. Awaiting 'yes'. Stored query: " + lastRecommendationQuery);
 
                     } else {
-                        awaitingImageConfirmation = false; // No confirmation needed
-                        lastRecommendationQuery = null; // Clear any old query
+                        awaitingImageConfirmation = false;
+                        lastRecommendationQuery = null;
                     }
 
-                    // Re-enable controls for next input
                     isAwaitingResponse = false;
                     setControlsEnabled(true);
                 });
-                currentSubscription = null; // Clear the subscription reference
+                currentSubscription = null;
             }
         });
     }
 
     private void handlePromptForRecommendation(String userInputText) {
-        if (userInputText.toLowerCase().matches(".*(yes|好啊|行|可以|要|发吧).*")) {
+        if (userInputText.toLowerCase().matches(".*(yes|ok|good|want|sure|show|image|photo|picture|look|see|ya|好啊|行|可以|要|看看|发吧|图片|照片).*")) {
             awaitingImageConfirmation = false;
+
             if (lastRecommendationQuery != null && !lastRecommendationQuery.isEmpty()) {
                 addMessage(new ChatMessage("AI", "Fetching images for: " + lastRecommendationQuery + "...", false));
                 chatRecyclerView.scrollToPosition(viewModel.getMessageList().size() - 1);
@@ -444,17 +432,17 @@ public class StyleFragment extends Fragment {
                 addMessage(new ChatMessage("AI", "Okay, but I don't have a specific recommendation to show images for right now.", false));
                 chatRecyclerView.scrollToPosition(viewModel.getMessageList().size() - 1);
             }
-        }else{
+        } else {
             addMessage(new ChatMessage("AI", "Okay, I won't show images then.", false));
-            chatRecyclerView.scrollToPosition(viewModel.getMessageList().size() - 1); // Use list from ViewModel
-            awaitingImageConfirmation = false; // Reset confirmation state
-            lastRecommendationQuery = null; // Clear stored query
+            chatRecyclerView.scrollToPosition(viewModel.getMessageList().size() - 1);
+            awaitingImageConfirmation = false;
+            lastRecommendationQuery = null;
         }
     }
 
     private String extractPotentialImageQueryFromAIResponse(String aiResponse) {
         if (aiResponse == null) return null;
-        // Try to parse [query: ...] marker first (most reliable)
+
         try {
             Pattern queryPattern = Pattern.compile("\\[query:([^]]+)]");
             Matcher matcher = queryPattern.matcher(aiResponse);
@@ -463,47 +451,46 @@ public class StyleFragment extends Fragment {
                 return group != null ? group.trim() : null;
             }
 
-            // Fallback: Heuristic method based on location of image request
-            String lowerResponse = aiResponse.toLowerCase();
-            int imageQuestionIndex = -1;
+            Pattern smartPattern = Pattern.compile(
+                    "\\b(?:a|an|some|this|that|your)?\\s*((?:[\\w\\-]+\\s+){0,3}?(outfit|look|style|dress|combo|set|fit|clothing))\\b",
+                    Pattern.CASE_INSENSITIVE);
+            Matcher smartMatcher = smartPattern.matcher(aiResponse);
+            while (smartMatcher.find()) {
+                String phrase = Objects.requireNonNull(smartMatcher.group(1)).trim();
+                if (phrase.length() >= 3) {
+                    return phrase;
+                }
+            }
 
-            // Look for common image offering questions
+            String lowerResponse = aiResponse.toLowerCase();
             List<String> triggers = Arrays.asList(
-                    "would you like to see image",
-                    "would you like to see some pictures",
-                    "would you like to see photos",
-                    "should i show you images",
-                    "want to see how it looks"
+                    "would you like to see", "want to see", "should i show you", "do you want images",
+                    "shall i show you", "image", "picture", "photo"
             );
 
             for (String trigger : triggers) {
-                if (lowerResponse.contains(trigger)) {
-                    imageQuestionIndex = lowerResponse.indexOf(trigger);
-                    break;
-                }
-            }
-
-            if (imageQuestionIndex > 0) {
-                int lastPeriod = lowerResponse.lastIndexOf('.', imageQuestionIndex - 1);
-                int lastQuestion = lowerResponse.lastIndexOf('?', imageQuestionIndex - 1);
-                int lastExclamation = lowerResponse.lastIndexOf('!', imageQuestionIndex - 1);
-                int sentenceEnd = Math.max(lastPeriod, Math.max(lastQuestion, lastExclamation));
-
-                if (sentenceEnd != -1 && sentenceEnd + 1 < imageQuestionIndex) {
-                    String potentialQuerySection = aiResponse.substring(sentenceEnd + 1, imageQuestionIndex);
-                    String cleaned = cleanQueryString(potentialQuerySection);
-                    if (cleaned.length() >= 3) {  // Require at least 3 characters for a meaningful query
-                        return cleaned;
+                int idx = lowerResponse.indexOf(trigger);
+                if (idx > 0) {
+                    int sentenceEnd = Math.max(
+                            lowerResponse.lastIndexOf('.', idx),
+                            Math.max(lowerResponse.lastIndexOf('!', idx), lowerResponse.lastIndexOf('?', idx))
+                    );
+                    if (sentenceEnd >= 0 && sentenceEnd + 1 < idx) {
+                        String context = aiResponse.substring(sentenceEnd + 1, idx);
+                        String cleaned = cleanQueryString(context);
+                        if (cleaned.length() >= 3) {
+                            return cleaned;
+                        }
                     }
-                } else {
-                    Log.w(TAG, "Could not find sentence end before image question.");
                 }
             }
+
         } catch (Exception e) {
             Log.e(TAG, "Error during query extraction heuristic", e);
         }
         return null;
     }
+
 
     private String cleanQueryString(String input) {
         if (input == null) return "";
@@ -514,16 +501,16 @@ public class StyleFragment extends Fragment {
                 .replaceAll("(?i)how about", "")
                 .replaceAll("(?i)try", "")
                 .replaceAll("(?i)something like", "")
+                .replaceAll("(?i)here are some", "")
+                .replaceAll("(?i)here are a few", "")
+                .replaceAll("(?i)to help you visualize them better", "")
+                .replaceAll("(?i)for more details", "")
+                .replaceAll("(?i)these outfits or styling tips", "")
+                .replaceAll("[.,!?:]", "")
+                .replaceAll("\\s+", " ")
                 .trim();
     }
 
-    /**
-     * Fetches outfit images from a web API (like Unsplash) based on a query string.
-     * IMPORTANT: Replace "YOUR_UNSPLASH_API_KEY" with your actual API key.
-     * This uses a basic HttpURLConnection and org.json for parsing.
-     * For a production app, consider using a dedicated library like Retrofit or Volley.
-     * This runs on the executor service to avoid blocking the main thread.
-     */
     private void fetchOutfitImagesFromWeb(String query) {
         // Ensure the query is not null or empty
         if (query == null || query.trim().isEmpty()) {
@@ -537,14 +524,12 @@ public class StyleFragment extends Fragment {
             return;
         }
 
-        // Execute the network request on the background executor service
         executor.execute(() -> {
             String apiKey = BuildConfig.UNSPLASH_API_KEY;
 
             HttpURLConnection connection = null; // Initialize connection variable
             try {
-                // Build the API URL. Using Uri.encode to handle spaces and special characters in the query.
-                // Added per_page=3 to limit results and orientation=portrait for potentially better outfit photos.
+
                 String urlString = "https://api.unsplash.com/search/photos?query=" +
                         Uri.encode(query) +
                         "&client_id=" + apiKey + "&per_page=3&orientation=portrait";
@@ -552,7 +537,6 @@ public class StyleFragment extends Fragment {
                 URL url = new URL(urlString);
                 connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
-                // Set read and connect timeouts to prevent ANRs on slow networks
                 connection.setReadTimeout(10000); // 10 seconds
                 connection.setConnectTimeout(15000); // 15 seconds
 
@@ -639,44 +623,40 @@ public class StyleFragment extends Fragment {
     }
 
 
-    // Utility: Add a ChatMessage to the list and notify adapter
-            private void addMessage(ChatMessage message) {
-                viewModel.getMessageList().add(message);
-                chatAdapter.notifyItemInserted(viewModel.getMessageList().size() - 1);
-            }
+    private void addMessage(ChatMessage message) {
+        viewModel.getMessageList().add(message);
+        chatAdapter.notifyItemInserted(viewModel.getMessageList().size() - 1);
+    }
 
-            // Utility: Enable or disable input buttons and text field
-            private void setControlsEnabled(boolean enabled) {
-                // Null checks added for safety, although UI elements should be initialized in onCreateView
-                if (userInputEditText != null) {
-                    userInputEditText.setEnabled(enabled);
-                }
-                if (sendButton != null) {
-                    sendButton.setEnabled(enabled);
-                }
-                if (uploadImageButton != null) {
-                    uploadImageButton.setEnabled(enabled);
-                }
-            }
+    private void setControlsEnabled(boolean enabled) {
+        if (userInputEditText != null) {
+            userInputEditText.setEnabled(enabled);
+        }
+        if (sendButton != null) {
+            sendButton.setEnabled(enabled);
+        }
+        if (uploadImageButton != null) {
+            uploadImageButton.setEnabled(enabled);
+        }
+    }
 
-            // Starts image picker intent
-            private void pickImage() {
-                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                pickImageLauncher.launch(intent);
-            }
+    // Starts image picker intent
+    private void pickImage() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        pickImageLauncher.launch(intent);
+    }
 
-            // Optional helper: Format Content object to a display-friendly string
-            private String formatContentForDisplay(Content content) {
-                StringBuilder sb = new StringBuilder();
-                for (Part part : content.getParts()) {
-                    if (part instanceof TextPart) {
-                        sb.append(((TextPart) part).getText()).append("\n");
-                    } else if (part instanceof ImagePart) {
-                        sb.append("[Image Attached]\n");
-                    }
-                }
-                return sb.toString().trim();
+    private String formatContentForDisplay(Content content) {
+        StringBuilder sb = new StringBuilder();
+        for (Part part : content.getParts()) {
+            if (part instanceof TextPart) {
+                sb.append(((TextPart) part).getText()).append("\n");
+            } else if (part instanceof ImagePart) {
+                sb.append("[Image Attached]\n");
             }
+        }
+        return sb.toString().trim();
+    }
 
     @SuppressWarnings({"ConstantConditions"})
     private String extractTextDeltaFromResponse(@NonNull GenerateContentResponse generateContentResponse) {
@@ -690,31 +670,38 @@ public class StyleFragment extends Fragment {
             if (generatedContent != null && generatedContent.getParts() != null) {
                 for (Part part : generatedContent.getParts()) {
                     if (part instanceof TextPart) {
-                        // Append the text from the TextPart
-                        deltaBuilder.append(((TextPart) part).getText());
+
+                        String text = ((TextPart) part).getText();
+                        deltaBuilder.append(text);
+
+                        extractAndLogImageUrls(text);
+                    } else {
+                        Log.w(TAG, "Unhandled Part type: " + part.getClass().getSimpleName());
                     }
-                    // TODO (Requirement 4): If the AI response includes information that
-                    // indicates an image reference (like a specific markdown syntax or
-                    // if the AI could actually generate structured output indicating URLs,
-                    // though Gemini Pro generally doesn't generate images itself but can
-                    // generate text about them), you would handle parsing that Part here.
-                    // This part of the code would likely need to identify specific Part types
-                    // beyond TextPart or parse the text for image URLs/identifiers.
                 }
             }
 
-            if(candidate.getFinishReason() != null && candidate.getFinishReason() != FinishReason.UNKNOWN) {
+            if (candidate.getFinishReason() != null && candidate.getFinishReason() != FinishReason.UNKNOWN) {
                 Log.d(TAG, "Candidate FinishReason: " + candidate.getFinishReason() +
                         " - Text collected so far: " + deltaBuilder);
-                // Depending on the finish reason (e.g., SAFETY, PROHIBITED_CONTENT), you might
-                // want to append a specific message to the deltaBuilder or log more details.
             }
 
-            // TODO: You might also want to check candidate.getFinishReason() or candidate.getSafetyRatings()
-            // for this specific candidate if you needed to react per-candidate rather than for the whole response.
+            if (candidate.getSafetyRatings() != null) {
+                Log.d(TAG, "Safety Ratings: " + candidate.getSafetyRatings());
+            }
         }
 
         return deltaBuilder.toString();
     }
+
+    private void extractAndLogImageUrls(String text) {
+        Pattern markdownImagePattern = Pattern.compile("!\\[[^]]*]\\(([^)]+)\\)");
+        Matcher matcher = markdownImagePattern.matcher(text);
+        while (matcher.find()) {
+            String imageUrl = matcher.group(1);
+            Log.d(TAG, "Detected image reference: " + imageUrl);
+        }
+    }
+
 }
 

@@ -16,13 +16,12 @@
     <string name="password">Password</string>
     <string name="cfpassword">Confirm Password</string>
     <string name="register">Register</string>
-    <string name="already_have_acc">Already have account?</string>
+    <string name="already_have_acc">Already have account? \n</string>
     <string name="login_now">Login Now</string>
     <string name="addPhoto">Add photo</string>
     <string name="select_gender">Select Gender</string>
 
     <!--Home-->
-    <string name="logout">Log Out</string>
     <string name="search_text">Spring 2025 trends</string>
     <string name="explore">Explore</string>
     <string name="pattern">Pattern</string>
@@ -44,7 +43,7 @@
 
     <!--Style-->
     <string name="send">Send</string>
-    <string name="send_message">Send Message...</string>
+    <string name="send_message">Send Message…</string>
     <string name="upload_image">Upload Image</string>
     <string name="chat_content_description">Chat messages between user and AI assistant</string>
     <string name="ai_generated_image">AI generated image</string>
@@ -52,90 +51,30 @@
     <string name="user_uploaded_image">User uploaded image</string>
 
     <!--Posts-->
-    <string name="explore_card">Explore Card</string>
-    <string name="post_category">Category (explore/forum/trends)</string>
+    <string name="post_category">Category</string>
     <string name="post_title">Title</string>
     <string name="post_description">Description</string>
-    <string name="next_btn">Next</string>
     <string name="post">Post</string>
     <string name="preview_image">preview of image</string>
     <string name="preview_video">Video Preview</string>
     <string name="like">Like</string>
-    <string name="like_count">99</string>
-    <string name="edit_media">Edit</string>
+    <string name="like_count">0</string>
     <string name="add_more">Add more</string>
     <string name="preview_image_border">image preview border</string>
     <string name="delete_img">Delete image</string>
-
-    <!--edit media-->
-    <string name="add_text">add text</string>
-    <string name="filter">Filter</string>
-    <string name="crop">Crop</string>
-    <string name="trim">trim video</string>
-    <string name="cancel">Cancel</string>
-    <string name="done">Done</string>
-    <string name="confirm">Confirm</string>
-    <string name="filter_thumbnail">filter thumbnail</string>
-    <string name="filter_name">Filter name</string>
-    <string name="video_play_pause">video play pause</string>
-    <string name="trim_and_save">Trim and Save</string>
-    <string name="start_00_00">Start: 00:00</string>
-    <string name="end_00_00">End: 00:00</string>
-    <string name="trimmed_duration_00_00">Trimmed Duration: 00:00</string>
-    <string name="enter_text">Enter Text</string>
-    <string name="_1_1">1/1</string>
-    <string name="image_index_format">%1$d/%2$d</string>
-
-    <string name="hello_blank_fragment">This is a blank fragment</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
-
-    <string name="lorem_ipsum">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
-        volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus
-        dui nec risus. Maecenas non sodales nisi, vel dictum dolor. Class aptent taciti sociosqu ad
-        litora torquent per conubia nostra, per inceptos himenaeos. Suspendisse blandit eleifend
-        diam, vel rutrum tellus vulputate quis. Aliquam eget libero aliquet, imperdiet nisl a,
-        ornare ex. Sed rhoncus est ut libero porta lobortis. Fusce in dictum tellus.\n\n
-        Suspendisse interdum ornare ante. Aliquam nec cursus lorem. Morbi id magna felis. Vivamus
-        egestas, est a condimentum egestas, turpis nisl iaculis ipsum, in dictum tellus dolor sed
-        neque. Morbi tellus erat, dapibus ut sem a, iaculis tincidunt dui. Interdum et malesuada
-        fames ac ante ipsum primis in faucibus. Curabitur et eros porttitor, ultricies urna vitae,
-        molestie nibh. Phasellus at commodo eros, non aliquet metus. Sed maximus nisl nec dolor
-        bibendum, vel congue leo egestas.\n\n
-        Sed interdum tortor nibh, in sagittis risus mollis quis. Curabitur mi odio, condimentum sit
-        amet auctor at, mollis non turpis. Nullam pretium libero vestibulum, finibus orci vel,
-        molestie quam. Fusce blandit tincidunt nulla, quis sollicitudin libero facilisis et. Integer
-        interdum nunc ligula, et fermentum metus hendrerit id. Vestibulum lectus felis, dictum at
-        lacinia sit amet, tristique id quam. Cras eu consequat dui. Suspendisse sodales nunc ligula,
-        in lobortis sem porta sed. Integer id ultrices magna, in luctus elit. Sed a pellentesque
-        est.\n\n
-        Aenean nunc velit, lacinia sed dolor sed, ultrices viverra nulla. Etiam a venenatis nibh.
-        Morbi laoreet, tortor sed facilisis varius, nibh orci rhoncus nulla, id elementum leo dui
-        non lorem. Nam mollis ipsum quis auctor varius. Quisque elementum eu libero sed commodo. In
-        eros nisl, imperdiet vel imperdiet et, scelerisque a mauris. Pellentesque varius ex nunc,
-        quis imperdiet eros placerat ac. Duis finibus orci et est auctor tincidunt. Sed non viverra
-        ipsum. Nunc quis augue egestas, cursus lorem at, molestie sem. Morbi a consectetur ipsum, a
-        placerat diam. Etiam vulputate dignissim convallis. Integer faucibus mauris sit amet finibus
-        convallis.\n\n
-        Phasellus in aliquet mi. Pellentesque habitant morbi tristique senectus et netus et
-        malesuada fames ac turpis egestas. In volutpat arcu ut felis sagittis, in finibus massa
-        gravida. Pellentesque id tellus orci. Integer dictum, lorem sed efficitur ullamcorper,
-        libero justo consectetur ipsum, in mollis nisl ex sed nisl. Donec maximus ullamcorper
-        sodales. Praesent bibendum rhoncus tellus nec feugiat. In a ornare nulla. Donec rhoncus
-        libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
-        vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
-    </string>
+    <string name="favourite_post">Favourite post</string>
+    <string name="fav_count">0</string>
+    <string name="media_page">1/1</string>
+    <string name="media_page_indicator">%1$d/%2$d</string>
+    <string name="posted_on">Posted on %1$s</string>
+    <string name="actions">actions</string>
 
     <!--Closet-->
     <string name="height">Height</string>
     <string name="unknown_data">--</string>
     <string name="weight">Weight</string>
     <string name="shoe_size">Shoe Size</string>
-    <string name="bra_size">Bra Size</string>
+    <string name="bra_size">Bra Cup Size</string>
     <string name="upper_body_size">Upper Body Size</string>
     <string name="shoulder_width">Shoulder Width:</string>
     <string name="arm_length">Arm Length:</string>
@@ -148,11 +87,108 @@
     <string name="edit_size">Edit Size</string>
     <string name="body_measure">Body Measure</string>
     <string name="ai_try_on">AI Try On</string>
-    <string name="gender_icon">gender</string>
+    <string name="gender_icon">Gender</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="unknown">Unknown</string>
+    <string name="size_profile_deleted">Size Profile data deleted</string>
+    <string name="size_profile_delete_failed">Failed to delete data</string>
+    <string name="add_size_profile">Add Your Size Profile</string>
+    <string name="user_data_load_failed">Failed to load user data</string>
+    <string name="please_login_first">Please log in first.</string>
 
+    <!--Edit Size Profile-->
+    <string name="edit_size_profile">Edit Size Profile</string>
+    <string name="height_cm">Height (cm)</string>
+    <string name="weight_kg">Weight (kg)</string>
+    <string name="save">Save</string>
+
+    <!--Closet-AI-->
     <string name="not_logged_in">Not logged in</string>
     <string name="login_required_title">Login Required</string>
     <string name="login_required_message">You need to log in to access your size profile.</string>
+    <string name="edit_detailed_sizes">Edit Detailed Sizes</string>
+    <string name="shoulder_width_cm">Shoulder Width (cm)</string>
+    <string name="arm_length_cm">Arm Length (cm)</string>
+    <string name="bust_cm">Bust (cm)</string>
+    <string name="waist_cm">Waist (cm)</string>
+    <string name="hip_cm">Hip (cm)</string>
+    <string name="foot_length_cm">Foot Length (cm)</string>
+    <string name="bra_band_size">Under bust</string>
+    <string name="shoe_size_eu">Shoe size (EU)</string>
+    <string name="user_model">User Model</string>
+    <string name="change_model">Change Model</string>
+    <string name="download">Download</string>
+    <string name="outfit">Outfit</string>
+    <string name="try_on">Try On</string>
+    <string name="upload_your_image_here">Upload your image here</string>
+    <string name="body_type">Body Type:</string>
+    <string name="main_shape">Main Shape:</string>
+    <string-array name="main_shape_simple_options">
+        <item>Slim</item>
+        <item>Average</item>
+        <item>Curvy</item>
+    </string-array>
+    <string name="body_shape">Body Shape</string>
+    <string name="tab_layout_description">Category tabs for outfit selection</string>
+    <string name="model_placeholder">model placeholder</string>
+    <string name="upload_new_outfit">upload new outfits</string>
+    <string-array name="body_shape_detailed_options">
+        <item>Pear</item>
+        <item>Apple</item>
+        <item>Hourglass</item>
+        <item>Rectangle</item>
+        <item>Inverted Triangle</item>
+    </string-array>
+    <string-array name="gender_options">
+        <item>Prefer not to say</item>
+        <item>Male</item>
+        <item>Female</item>
+    </string-array>
+    <string name="bra_size_format">%1$s%2$s</string>
+
+    <!--Fragment Me-->
+    <string name="settings">Settings</string>
+    <string name="logout">Log Out</string>
+    <string name="favourites">Favourites</string>
+    <string name="go">Go</string>
+    <string name="user_avatar">User Avatar</string>
+    <string name="anonymous">anonymous</string>
+    <string name="login_register">Login / Register</string>
+    <string name="please_log_in_first">Please log in first.</string>
+    <string name="failed_to_load_user_data">Failed to load user data.</string>
+    <string name="logged_out">Logged out</string>
+    <string name="contact_number">Contact</string>
+    <string name="enter_contact">Enter contact number</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="enter_username">Enter username</string>
+    <string name="update">update</string>
+    <string name="change_password">Change Password</string>
+    <string name="current_password">Current Password</string>
+    <string name="enter_current_password">Enter current password</string>
+    <string name="new_password">New Password</string>
+    <string name="enter_new_password">Enter new password</string>
+    <string name="confirm_new_password">Confirm New Password</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="favourite_posts">Favourite Posts</string>
+    <string name="update_post">Update</string>
+
+    <!--Admin-->
+    <string name="admin_dashboard">Admin Dashboard</string>
+    <string name="manage_users">Manage Users</string>
+    <string name="manage_posts">Manage Posts</string>
+    <string name="manage_admin">Manage Admin</string>
+    <string name="Admin">Admin Info</string>
+    <string name="admin_name">Admin Name</string>
+    <string name="search_by_name_or_email">Search by username or email</string>
+    <string name="email_example_com">email@example.com</string>
+    <string name="search_by_title_or_content">Search by title or content</string>
+    <string name="search_by_admin">Search by admin username or email</string>
+    <string name="Role">role</string>
+    <string name="role_admin_or_superadmin">Role (admin or superadmin)</string>
+    <string name="admin_id">Admin ID</string>
+    <string name="password_requirements">• Minimum 8 characters\n• At least 1 uppercase letter\n• At least 1 lowercase letter\n• At least 1 number</string>
 </resources>

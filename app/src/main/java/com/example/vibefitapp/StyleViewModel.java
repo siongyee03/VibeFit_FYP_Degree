@@ -3,11 +3,9 @@ package com.example.vibefitapp;
 import androidx.lifecycle.ViewModel;
 import android.util.Log;
 
-import com.google.firebase.vertexai.java.GenerativeModelFutures;
-import com.google.firebase.vertexai.java.ChatFutures;
-import com.google.firebase.vertexai.type.Content;
-import com.google.firebase.vertexai.type.Part;
-import com.google.firebase.vertexai.type.TextPart;
+import com.google.firebase.ai.java.ChatFutures;
+import com.google.firebase.ai.java.GenerativeModelFutures;
+import com.google.firebase.ai.type.Content;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,8 +1,12 @@
 package com.example.vibefitapp;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -13,7 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,8 +24,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import java.util.ArrayList;
-import java.util.List;
 
 public class FooterFragment extends Fragment {
 
@@ -30,92 +35,120 @@ public class FooterFragment extends Fragment {
     private ImageView iconHome, iconCloset, iconStyle, iconMe;
     private TextView textHome, textCloset, textStyle, textMe;
     private ImageButton uploadButton;
-    private String recommendedCategory = "tutorial/pattern";
+    private String recommendedCategory;
     private int selectedTab = -1; // Track the currently selected Tab; -1 indicates that none is selected.
-    private ActivityResultLauncher<Intent> mediaPickerLauncher;
 
     public FooterFragment() {
         // Required empty public constructor
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        mediaPickerLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == FragmentActivity.RESULT_OK && result.getData() != null) {
-                        Intent data = result.getData();
-
-                        boolean hasVideo = false;
-                        Uri videoUri = null;
-                        List<Uri> imageUris = new ArrayList<>();
-
-                        if (data.getClipData() != null) {
-                            int count = data.getClipData().getItemCount();
-                            for (int i = 0; i < count; i++) {
-                                Uri uri = data.getClipData().getItemAt(i).getUri();
-                                String type = requireActivity().getContentResolver().getType(uri);
-                                if (type != null && type.startsWith("video")) {
-                                    hasVideo = true;
-                                    videoUri = uri;
-                                    break;
-                                } else if (type != null && type.startsWith("image")) {
-                                    imageUris.add(uri);
-                                }
-                            }
-
-                            if (hasVideo && count > 1) {
-                                Toast.makeText(getContext(), "Cannot select both video and image at the same time.", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-
-                        } else if (data.getData() != null) {
-                            Uri uri = data.getData();
-                            String type = requireActivity().getContentResolver().getType(uri);
-                            if (type != null && type.startsWith("video")) {
-                                videoUri = uri;
-                            } else if (type != null && type.startsWith("image")) {
-                                imageUris.add(uri);
-                            }
-                        }
-
-                        Intent intent = new Intent(getActivity(), MediaEditActivity.class);
-                        if (videoUri != null) {
-                            intent.putExtra("video_uri", videoUri.toString());
-                        } else if (!imageUris.isEmpty()) {
-                            ArrayList<String> imageUriStrings = new ArrayList<>();
-                            for (Uri uri : imageUris) {
-                                imageUriStrings.add(uri.toString());
-                            }
-                            intent.putStringArrayListExtra("image_uris", imageUriStrings);
-                    } else {
-                            Toast.makeText(getContext(), "Please select an image or video.", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
-                        if (getActivity() instanceof HomeActivity) {
-                            String currentTab = ((HomeActivity) getActivity()).getCurrentHeaderTab();
-                            intent.putExtra("source_tab", currentTab);
-                        }
-
-                        intent.putExtra("recommended_category", recommendedCategory);
-
-                        startActivity(intent);
+    private void showMediaChoiceDialog() {
+        String[] options = {"Choose from gallery", "Take photo"};
+        new AlertDialog.Builder(getContext())
+                .setTitle("Upload Post")
+                .setItems(options, (dialog, which) -> {
+                    if (which == 0) {
+                        selectMedia();
+                    } else if (which == 1) {
+                        capturePhoto();
                     }
-                }
-        );
+                })
+                .show();
     }
 
     private void selectMedia() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("*/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
         String[] mimeTypes = {"image/*", "video/*"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         mediaPickerLauncher.launch(intent);
+    }
+
+    private void capturePhoto() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(requireActivity().getPackageManager()) != null) {
+            mediaPickerLauncher.launch(takePictureIntent);
+        }
+    }
+
+    private final ActivityResultLauncher<Intent> mediaPickerLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Intent data = result.getData();
+                    ArrayList<String> imageUris = new ArrayList<>();
+                    Uri videoUri = null;
+
+                    Bundle extras = data.getExtras();
+                    if (extras != null) {
+                        Bitmap bitmap = extras.getParcelable("data");
+                        if (bitmap != null) {
+                            Uri photoUri = ImageUtils.saveBitmapToCache(requireContext(), bitmap);
+                            if (photoUri != null) {
+                                imageUris.add(photoUri.toString());
+                            }
+                        } else {
+                            Toast.makeText(getContext(), "Failed to capture image.", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                }
+                    else if (data.getClipData() != null) {
+                        int count = data.getClipData().getItemCount();
+                        for (int i = 0; i < count; i++) {
+                            Uri uri = data.getClipData().getItemAt(i).getUri();
+                            String type = requireContext().getContentResolver().getType(uri);
+                            if (type != null && type.startsWith("video")) {
+                                videoUri = uri;
+                                break;
+                            } else if (type != null && type.startsWith("image")) {
+                                imageUris.add(uri.toString());
+                            }
+                        }
+                    } else if (data.getData() != null) {
+                        Uri uri = data.getData();
+                        String type = requireContext().getContentResolver().getType(uri);
+                        if (type != null && type.startsWith("video")) {
+                            videoUri = uri;
+                        } else if (type != null && type.startsWith("image")) {
+                            imageUris.add(uri.toString());
+                        }
+                    }
+
+                    if (videoUri != null && !imageUris.isEmpty()) {
+                        Toast.makeText(getContext(), "You cannot upload images and video together.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    Intent intent = new Intent(getActivity(), UploadPostActivity.class);
+                    if (videoUri != null) {
+                        intent.putExtra("video_uri", videoUri.toString());
+                    } else if (!imageUris.isEmpty()) {
+                        intent.putStringArrayListExtra("image_uris", imageUris);
+                    }
+
+                    if (getActivity() instanceof HomeActivity) {
+                        String currentTab = ((HomeActivity) getActivity()).getCurrentHeaderTab();
+                        intent.putExtra("source_tab", currentTab);
+                        intent.putExtra("recommended_category", getRecommendedCategoryByTab(currentTab));
+                    }
+
+                    startActivity(intent);
+                }
+            }
+    );
+
+    private String getRecommendedCategoryByTab(String currentTab) {
+        if (currentTab == null) return "tutorial/pattern";
+        switch (currentTab.toLowerCase()) {
+            case "forum":
+                return "forum";
+            case "trends":
+                return "trends";
+            default:
+                return "tutorial/pattern";
+        }
     }
 
     @Nullable
@@ -142,19 +175,17 @@ public class FooterFragment extends Fragment {
 
         uploadButton = view.findViewById(R.id.upload_button);
         uploadButton.setOnClickListener(v -> {
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user == null) {
+                Toast.makeText(getContext(), "Please log in to upload a post.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             if (getActivity() instanceof HomeActivity) {
                 HomeActivity homeActivity = (HomeActivity) getActivity();
                 String currentTab = homeActivity.getCurrentHeaderTab();
-
-                switch (currentTab) {
-                    case "explore":
-                        recommendedCategory = "tutorial/pattern";
-                        break;
-                    case "forum":
-                        recommendedCategory = "forum";
-                        break;
-                }
-                selectMedia();
+                recommendedCategory = getRecommendedCategoryByTab(currentTab);
+                showMediaChoiceDialog();
             }
         });
 

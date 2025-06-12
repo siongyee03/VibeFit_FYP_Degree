@@ -2,6 +2,7 @@ package com.example.vibefitapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,6 +16,15 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        String targetTab = getIntent().getStringExtra("target_tab");
+        HeaderFragment headerFragment = new HeaderFragment();
+
+        if (targetTab != null) {
+            Bundle args = new Bundle();
+            args.putString("target_tab", targetTab);
+            headerFragment.setArguments(args);
+        }
+
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.header_container, new HeaderFragment())
                 .commit();
@@ -27,17 +37,6 @@ public class HomeActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.content_frame, new ExploreFragment())
                 .commit();
-
-        // logout button
-        findViewById(R.id.btn_logout).setOnClickListener(v -> {
-            FirebaseAuth.getInstance().signOut();
-            Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show();
-
-            Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
-        });
     }
 
     public void setHeaderVisibility(boolean visible) {

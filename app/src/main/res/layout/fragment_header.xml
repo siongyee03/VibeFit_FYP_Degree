@@ -8,60 +8,6 @@
     android:padding="16dp"
     tools:context=".HeaderFragment">
 
-    <!-- Search bar and notification -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <!-- Search Bar -->
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:background="@drawable/search_bar_bg"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp">
-
-            <ImageView
-                android:id="@+id/search_icon"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:contentDescription="@string/searchFunction"
-                android:src="@drawable/ic_search"
-                app:tint="@color/icon_black"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
-
-            <AutoCompleteTextView
-                android:id="@+id/search_edit_text"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="10dp"
-                android:autofillHints="no"
-                android:background="@android:color/transparent"
-                style="@style/FontRobotoMonoRegular"
-                android:hint="@string/search_text"
-                android:inputType="text"
-                android:textColorHint="#78909C"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/search_icon"
-                app:layout_constraintTop_toTopOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <!-- Notification Icon -->
-        <ImageView
-            android:id="@+id/notification_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginStart="12dp"
-            android:src="@drawable/ic_notification"
-            android:contentDescription="@string/notification" />
-    </LinearLayout>
-
     <!-- Tab Bar -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_bar"

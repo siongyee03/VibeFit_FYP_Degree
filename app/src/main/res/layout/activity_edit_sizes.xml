@@ -1,10 +1,179 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/white"
     tools:context=".EditSizesActivity">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="12dp"
+            android:paddingTop="32dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="0dp">
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@null"
+                android:contentDescription="@string/back_button"
+                android:padding="8dp"
+                android:src="@drawable/ic_arrow_back" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_detailed_sizes"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                style="@style/FontRobotoMonoRegular"
+                android:layout_gravity="center_horizontal" />
+
+            <!-- Upper Body -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/upper_body_size"
+                android:textSize="18sp"
+                android:layout_marginTop="34dp"
+                android:layout_marginBottom="5dp"
+                android:textStyle="bold"
+                style="@style/FontRobotoMonoRegular" />
+
+            <EditText
+                android:id="@+id/et_shoulder"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:hint="@string/shoulder_width_cm"
+                android:inputType="number"
+                android:autofillHints="shoulder" />
+
+            <EditText
+                android:id="@+id/et_arm_length"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:layout_marginTop="16dp"
+                android:autofillHints="arm_length"
+                android:hint="@string/arm_length_cm"
+                android:inputType="number" />
+
+            <EditText
+                android:id="@+id/et_bust"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:layout_marginTop="16dp"
+                android:autofillHints="bust"
+                android:hint="@string/bust_cm"
+                android:inputType="number" />
+
+            <!-- Lower Body -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lower_body_size"
+                android:textSize="18sp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="5dp"
+                android:textStyle="bold"
+                style="@style/FontRobotoMonoRegular" />
+
+            <EditText
+                android:id="@+id/et_waist"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:hint="@string/waist_cm"
+                android:inputType="number"
+                android:autofillHints="waist" />
+
+            <EditText
+                android:id="@+id/et_hip"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:layout_marginTop="16dp"
+                android:hint="@string/hip_cm"
+                android:inputType="number"
+                android:autofillHints="hip" />
+
+            <!-- Body Shape -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/body_type"
+                android:textSize="18sp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="5dp"
+                android:textStyle="bold"
+                style="@style/FontRobotoMonoRegular" />
+
+            <Spinner
+                android:id="@+id/spinner_main_shape"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:entries="@array/main_shape_simple_options"
+                android:spinnerMode="dropdown"
+                android:background="@drawable/edittext_bg"
+                android:fontFamily="@font/roboto_mono_regular"
+                android:textSize="16sp"/>
+
+            <Spinner
+                android:id="@+id/spinner_body_shape"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:layout_marginTop="16dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:entries="@array/body_shape_detailed_options"
+                android:spinnerMode="dropdown"
+                android:background="@drawable/edittext_bg"
+                android:textSize="16sp"
+                android:fontFamily="@font/roboto_mono_regular" />
+
+            <!-- Foot Size -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/foot_size"
+                android:textSize="18sp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="5dp"
+                android:textStyle="bold"
+                style="@style/FontRobotoMonoRegular" />
+
+            <EditText
+                android:id="@+id/et_foot_length"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:hint="@string/foot_length_cm"
+                android:inputType="number"
+                android:autofillHints="foot_length" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_save"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:layout_marginTop="32dp"
+                android:text="@string/save"
+                android:textAllCaps="true"
+                style="@style/ButtonStyle"
+                android:textSize="20sp" />
+
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

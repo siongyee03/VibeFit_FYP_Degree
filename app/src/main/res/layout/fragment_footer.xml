@@ -5,7 +5,7 @@
     android:id="@+id/footer_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#FFFFFF"
+    android:background="@color/white"
     android:paddingVertical="8dp">
 
     <!-- Home -->
@@ -37,6 +37,7 @@
             android:layout_marginTop="4dp"
             android:fontFamily="@font/roboto_regular"
             android:text="@string/home"
+            android:textStyle="bold"
             android:textAllCaps="true"
             android:textColor="@color/gray"
             android:textSize="14sp" />
@@ -69,6 +70,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="@string/closet"
+            android:textStyle="bold"
             android:textAllCaps="true"
             android:textColor="@color/gray"
             android:textSize="14sp"
@@ -119,6 +121,7 @@
             android:layout_marginTop="4dp"
             android:fontFamily="@font/roboto_regular"
             android:text="@string/style"
+            android:textStyle="bold"
             android:textAllCaps="true"
             android:textColor="@color/gray"
             android:textSize="14sp" />
@@ -153,6 +156,7 @@
             android:layout_marginTop="4dp"
             android:fontFamily="@font/roboto_regular"
             android:text="@string/me"
+            android:textStyle="bold"
             android:textAllCaps="true"
             android:textColor="@color/gray"
             android:textSize="14sp" />

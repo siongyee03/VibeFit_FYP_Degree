@@ -19,7 +19,7 @@
         android:layout_height="24dp"
         android:layout_gravity="top|end"
         android:background="@android:color/transparent"
-        android:src="@android:drawable/ic_delete"
+        android:src="@drawable/ic_close_cancel"
         android:contentDescription="@string/delete_img"
         android:padding="4dp"
         app:tint="@color/icon_black" />

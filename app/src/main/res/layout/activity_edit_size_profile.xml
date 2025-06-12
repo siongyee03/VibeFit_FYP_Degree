@@ -1,10 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     tools:context=".EditSizeProfile">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="12dp"
+            android:paddingTop="32dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="0dp">
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@null"
+                android:contentDescription="@string/back_button"
+                android:padding="8dp"
+                android:src="@drawable/ic_arrow_back" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_size_profile"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                style="@style/FontRobotoMonoRegular"
+                android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/height"
+                android:textSize="18sp"
+                android:layout_marginTop="34dp"
+                android:textStyle="bold"
+                style="@style/FontRobotoMonoRegular" />
+
+            <EditText
+                android:id="@+id/et_height"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:layout_marginTop="5dp"
+                android:hint="@string/height_cm"
+                android:inputType="numberDecimal"
+                android:autofillHints="height" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/weight"
+                android:textSize="18sp"
+                android:layout_marginTop="24dp"
+                android:textStyle="bold"
+                style="@style/FontRobotoMonoRegular" />
+
+            <EditText
+                android:id="@+id/et_weight"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:layout_marginTop="5dp"
+                android:hint="@string/weight_kg"
+                android:inputType="numberDecimal"
+                android:autofillHints="weight" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/shoe_size"
+                android:textSize="18sp"
+                android:layout_marginTop="24dp"
+                android:textStyle="bold"
+                style="@style/FontRobotoMonoRegular" />
+
+            <EditText
+                android:id="@+id/et_shoe_size"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:layout_marginTop="5dp"
+                android:inputType="number"
+                android:autofillHints="shoe_size"
+                android:hint="@string/shoe_size_eu" />
+
+            <TextView
+                android:id="@+id/braCupSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/bra_size"
+                android:textSize="18sp"
+                android:layout_marginTop="24dp"
+                android:textStyle="bold"
+                style="@style/FontRobotoMonoRegular" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:weightSum="2">
+
+                <Spinner
+                    android:id="@+id/spinner_bra_band_size"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="57dp"
+                    android:background="@drawable/edittext_bg"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:spinnerMode="dropdown"
+                    android:fontFamily="@font/roboto_mono_regular" />
+
+                <Spinner
+                    android:id="@+id/spinner_bra_cup"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="57dp"
+                    android:layout_marginStart="8dp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:spinnerMode="dropdown"
+                    android:background="@drawable/edittext_bg"
+                    android:fontFamily="@font/roboto_mono_regular"/>
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_save"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:layout_marginTop="32dp"
+                android:text="@string/save"
+                android:textAllCaps="true"
+                style="@style/ButtonStyle" />
+
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

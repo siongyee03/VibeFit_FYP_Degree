@@ -11,6 +11,26 @@
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.OPEN_DOCUMENT" />
+
+            <category android:name="android.intent.category.OPENABLE" />
+
+            <data android:mimeType="image/*" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.OPEN_DOCUMENT" />
+
+            <category android:name="android.intent.category.OPENABLE" />
+
+            <data android:mimeType="video/*" />
+        </intent>
+    </queries>
+
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
@@ -24,6 +44,37 @@
         android:theme="@style/Theme.VibeFitApp"
         tools:targetApi="31">
         <activity
+            android:name=".EntryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ManageAdminActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ManagePostsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ForgotPasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ChangePasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".FavouritePostsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UserProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PostDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.VibeFitApp" />
+        <activity
+            android:name=".AdminDashboardActivity"
+            android:exported="false" />
+        <activity
             android:name=".AiTryOnActivity"
             android:exported="false" />
         <activity
@@ -33,21 +84,6 @@
             android:name=".EditSizesActivity"
             android:exported="false" />
         <activity
-            android:name=".TextOverlayActivity"
-            android:exported="false" />
-        <activity
-            android:name=".TrimActivity"
-            android:exported="false" />
-        <activity
-            android:name=".CropActivity"
-            android:exported="false" />
-        <activity
-            android:name=".FilterActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MediaEditActivity"
-            android:exported="false" />
-        <activity
             android:name=".UploadPostActivity"
             android:exported="false" />
         <activity
@@ -55,13 +91,13 @@
             android:exported="false"
             android:theme="@style/Theme.VibeFitApp" />
         <activity
-            android:name=".HomeActivity"
-            android:exported="true" />
+            android:name=".LoginActivity"
+            android:exported="false" />
         <activity
             android:name=".RegisterActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".HomeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

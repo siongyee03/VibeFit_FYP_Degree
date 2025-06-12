@@ -1,10 +1,14 @@
 package com.example.vibefitapp;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +25,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 
+import java.io.OutputStream;
 import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -160,16 +165,30 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 .into(new CustomTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        String savedImageURL = MediaStore.Images.Media.insertImage(
-                                context.getContentResolver(),
-                                resource,
-                                "chat_image_" + System.currentTimeMillis(),
-                                "Image from chat"
-                        );
-                        if (savedImageURL != null) {
-                            Toast.makeText(context, "Image saved to gallery!", Toast.LENGTH_SHORT).show();
+                        String displayName = "chat_image_" + System.currentTimeMillis() + ".jpg";
+                        ContentValues values = new ContentValues();
+                        values.put(MediaStore.Images.Media.DISPLAY_NAME, displayName);
+                        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+                        values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/VibeFit");
+
+                        Uri imageUri = context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                        if (imageUri != null) {
+                            try {
+                                OutputStream out = context.getContentResolver().openOutputStream(imageUri);
+                                if (out != null) {
+                                    try (out) {
+                                        resource.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                                        Toast.makeText(context, "Image saved to gallery!", Toast.LENGTH_SHORT).show();
+                                    }
+                                } else {
+                                    Toast.makeText(context, "Failed to open output stream.", Toast.LENGTH_SHORT).show();
+                                }
+                            } catch (Exception e) {
+                                Log.e("ChatAdapter", "Failed to save image", e);
+                                Toast.makeText(context, "Failed to save image.", Toast.LENGTH_SHORT).show();
+                            }
                         } else {
-                            Toast.makeText(context, "Failed to save image.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, "Failed to create media entry.", Toast.LENGTH_SHORT).show();
                         }
                     }
 

@@ -5,6 +5,7 @@ public class User {
     private String email;
     private String profileImageUrl;
     private String gender;
+    private String role;
 
     public User() {
         // Default constructor required for Firebase Firestore
@@ -21,10 +22,20 @@ public class User {
         this.profileImageUrl = profileImageUrl;
     }
 
-    public User(String username, String email, String profileImageUrl, String gender) {
+    public User(String username, String email, String profileImageUrl, String gender, String role) {
         this(username, email, profileImageUrl);
         this.gender = gender;
+        this.role = role;
     }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
 
     public String getUsername() {
         return username;
@@ -58,12 +69,7 @@ public class User {
     }
 
     public boolean isDefaultAvatar() {
-        try {
-            Integer.parseInt(profileImageUrl);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
+        return profileImageUrl == null || profileImageUrl.isEmpty();
     }
 }
 

@@ -9,12 +9,15 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 //login authentication
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FirebaseStorage;
+
 import android.widget.Toast;
 
 public class LoginActivity extends AppCompatActivity {
@@ -40,10 +43,9 @@ public class LoginActivity extends AppCompatActivity {
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
-        mAuth.useEmulator("10.0.2.2", 9099); // Auth Emulator
+
         //FireStore
         db = FirebaseFirestore.getInstance();
-        db.useEmulator("10.0.2.2", 8080); // Firestore Emulator
 
         // Back Button Click Listener
         backButton.setOnClickListener(v -> {
@@ -55,11 +57,11 @@ public class LoginActivity extends AppCompatActivity {
             if (loginPass.getTransformationMethod() instanceof PasswordTransformationMethod) {
                 // Show password
                 loginPass.setTransformationMethod(null);
-                passwordToggle.setImageResource(R.drawable.ic_eye); // Change icon to open eye
+                passwordToggle.setImageResource(R.drawable.ic_eye);
             } else {
                 // Hide password
                 loginPass.setTransformationMethod(new PasswordTransformationMethod());
-                passwordToggle.setImageResource(R.drawable.ic_eye_off); // Change icon to closed eye
+                passwordToggle.setImageResource(R.drawable.ic_eye_off);
             }
         });
 
@@ -68,11 +70,10 @@ public class LoginActivity extends AppCompatActivity {
             String email = loginEmail.getText().toString();
             String password = loginPass.getText().toString();
 
-            // Validate email and password (very important!)
             if (email.isEmpty()) {
                 loginEmail.setError("Email is required");
                 loginEmail.requestFocus(); // Request focus to the email field
-                return; // Stop further execution
+                return;
             }
 
             if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
@@ -93,20 +94,15 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            // Now that you've validated, call Firebase Authentication
             signInUser(email, password);
 
         });
 
-        // Forgot Password Click Listener
         forgotPassword.setOnClickListener(v -> {
-            // Navigate to Forgot Password Activity
-            // Example: startActivity(new Intent(LoginActivity.this, ForgotPasswordActivity.class));
+            startActivity(new Intent(LoginActivity.this, ForgotPasswordActivity.class));
         });
 
-        // Register Now Click Listener
         registerNow.setOnClickListener(v -> {
-            // Navigate to Register Activity
             startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
         });
     }
@@ -120,10 +116,8 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
             startActivity(intent);
             finish(); // Close LoginActivity
-        }
-        else {
-            // User is signed in but not verified
-            //You may want to log them out or resend verification email here
+        } else {
+
             mAuth.signOut(); //Sign out user, prompt to verify again
         }
     }
@@ -132,49 +126,58 @@ public class LoginActivity extends AppCompatActivity {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        // Sign in success, update UI with the signed-in user's information
                         FirebaseUser user = mAuth.getCurrentUser();
 
-                        // Check if email is verified (important!)
                         if (user != null && user.isEmailVerified()) {
-                            // Proceed to the next activity (e.g., HomeActivity)
-                            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                            startActivity(intent);
-                            finish(); // Close LoginActivity so the user can't go back without logging out
+                            db.collection("users").document(user.getUid())
+                                    .get()
+                                    .addOnSuccessListener(documentSnapshot -> {
+                                        if (documentSnapshot.exists()) {
+                                            String role = documentSnapshot.getString("role");
+                                            if (role != null) {
+                                                Intent intent;
+                                                if (role.equals("admin") || role.equals("superadmin")) {
+                                                    intent = new Intent(LoginActivity.this, AdminDashboardActivity.class);
+                                                } else {
+                                                    intent = new Intent(LoginActivity.this, HomeActivity.class);
+                                                }
+                                                Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                                                startActivity(intent);
+                                                finish();
+                                            } else {
+                                                Toast.makeText(this, "Role not defined. Contact support.", Toast.LENGTH_SHORT).show();
+                                            }
+                                        } else {
+                                            Toast.makeText(this, "User record not found.", Toast.LENGTH_SHORT).show();
+                                        }
+                                    })
+                                    .addOnFailureListener(e -> Toast.makeText(this, "Failed to fetch user role: " + e.getMessage(), Toast.LENGTH_SHORT).show());
                         } else {
-                            // Email is not verified
-                            // Display a message to the user and/or send a verification email again
                             loginEmail.setError("Please verify your email address");
                             loginEmail.requestFocus();
 
-                            // Optionally, you can resend the verification email:
-                            if(user!=null) { //Added Null Check
+                            if (user != null) {
                                 user.sendEmailVerification().addOnCompleteListener(sendTask -> {
                                     if (sendTask.isSuccessful()) {
-                                        // Verification email resent successfully
-                                        // Display a message to the user
                                         Toast.makeText(LoginActivity.this, "Verification email resent", Toast.LENGTH_SHORT).show();
                                     } else {
-                                        // Handle the error
                                         Toast.makeText(LoginActivity.this, "Failed to send verification email", Toast.LENGTH_SHORT).show();
                                     }
                                 });
-                            } else{
-                                Toast.makeText(LoginActivity.this, "Could not resend verification email. Please try again later.", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(LoginActivity.this, "Could not resend verification email.", Toast.LENGTH_SHORT).show();
                             }
                         }
 
                     } else {
-                        // If sign in fails, display a message to the user.
                         Exception e = task.getException();
                         if (e != null) {
-                            Log.w("LoginActivity", "signInWithEmail:failure", task.getException());
-                            loginEmail.setError("Authentication failed: " + e.getMessage()); // Display Firebase's error message
+                            Log.w("LoginActivity", "signInWithEmail:failure", e);
+                            loginEmail.setError("Authentication failed: " + e.getMessage());
                             loginEmail.requestFocus();
                         }
                     }
                 });
     }
-
 }
 
