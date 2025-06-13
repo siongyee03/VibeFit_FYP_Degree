@@ -102,7 +102,7 @@ public class StyleFragment extends Fragment {
                                 Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
 
                                 if (bitmap == null) {
-                                    Toast.makeText(getContext(), "Failed to decode image", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getContext(), "Couldn't decode the image.", Toast.LENGTH_SHORT).show();
                                     selectedImageBitmap = null;
                                     userInputEditText.setHint(R.string.send_message);
                                     return;
@@ -110,32 +110,32 @@ public class StyleFragment extends Fragment {
 
                                 selectedImageBitmap = compressBitmap(bitmap);
 
-                                Toast.makeText(getContext(), "Image selected, add text and send!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "Image ready! Add your text and send.", Toast.LENGTH_SHORT).show();
                                 userInputEditText.setHint("Enter text related to the image...");
 
                             } catch (IOException e) {
                                 Log.e(TAG, "Error loading image", e);
-                                Toast.makeText(getContext(), "Failed to load image", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "Couldn't load image. Please try again.", Toast.LENGTH_SHORT).show();
                                 selectedImageBitmap = null;
                                 userInputEditText.setHint(R.string.send_message);
 
                             } catch (Exception e) {
                                 Log.e(TAG, "Unexpected error selecting image", e);
-                                Toast.makeText(getContext(), "An error occurred selecting the image", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "Couldn't select image. Please try again.", Toast.LENGTH_SHORT).show();
                                 selectedImageBitmap = null;
                                 userInputEditText.setHint(R.string.send_message);
                             }
                         } else {
                             Log.w(TAG, "Image Uri is null from result data even though data Intent was not null.");
-                            Toast.makeText(getContext(), "Could not get image Uri", Toast.LENGTH_SHORT).show();
-                            selectedImageBitmap = null; // Ensure it's null
-                            userInputEditText.setHint(R.string.send_message); // Restore hint
+                            Toast.makeText(getContext(), "Unable to get image. Please try again.", Toast.LENGTH_SHORT).show();
+                            selectedImageBitmap = null;
+                            userInputEditText.setHint(R.string.send_message);
                         }
 
                     } else {
                         Log.d(TAG, "Image picking cancelled or no data returned.");
-                        selectedImageBitmap = null; // Clear any potentially half-selected image
-                        userInputEditText.setHint(R.string.send_message); // Restore hint
+                        selectedImageBitmap = null;
+                        userInputEditText.setHint(R.string.send_message);
                     }
                 });
     }
@@ -222,7 +222,7 @@ public class StyleFragment extends Fragment {
 
         // Prevent sending multiple messages while waiting for a response
         if (isAwaitingResponse) {
-            Toast.makeText(getContext(), "Please wait for the previous response to complete...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Please wait for the current response to finish.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -240,8 +240,7 @@ public class StyleFragment extends Fragment {
         }
 
         if (parts.isEmpty()) {
-            // Don't send if there's no text and no image
-            Toast.makeText(getContext(), "Please enter text or select an image!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Don't forget to write something or pick an image!", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -259,21 +258,19 @@ public class StyleFragment extends Fragment {
         chatRecyclerView.scrollToPosition(viewModel.getMessageList().size() - 1);
 
         // Add a placeholder message for the AI response
-        ChatMessage aiThinkingMessage = new ChatMessage("AI", "Thinking...", false);
+        ChatMessage aiThinkingMessage = new ChatMessage("AI", "Just a moment, thinking...", false);
         addMessage(aiThinkingMessage); // false indicates AI message
         chatRecyclerView.scrollToPosition(viewModel.getMessageList().size() - 1);
 
         isAwaitingResponse = true;
-        setControlsEnabled(false); // Disable input controls
+        setControlsEnabled(false);
 
-        // Send the message to the AI model using the chat object (streaming)
         Publisher<GenerateContentResponse> publisher = viewModel.getChat().sendMessageStream(userContent);
 
-        // Subscribe to the streaming response
         publisher.subscribe(new Subscriber<>() {
 
-            private final ChatMessage currentAiMessage = aiThinkingMessage; // Reference to the placeholder message
-            private final StringBuilder aiResponseBuilder = new StringBuilder(); // To build the full AI response text
+            private final ChatMessage currentAiMessage = aiThinkingMessage;
+            private final StringBuilder aiResponseBuilder = new StringBuilder();
             private boolean thinkingMessageRemoved = false;
 
             @Override
@@ -288,7 +285,6 @@ public class StyleFragment extends Fragment {
                 requireActivity().runOnUiThread(() -> {
                     String delta = extractTextDeltaFromResponse(generateContentResponse);
 
-                    // Only process if there's actual text received in this chunk
                     if (!delta.isEmpty()) {
                         List<ChatMessage> currentMessageList = viewModel.getMessageList();
 
@@ -384,10 +380,10 @@ public class StyleFragment extends Fragment {
                     if (aiResponseBuilder.length() == 0) {
                         int thinkingMessagePosition = currentMessageList.indexOf(currentAiMessage);
                         if (thinkingMessagePosition != -1) {
-                            currentAiMessage.setText("Hmm... I didn't get that. Try rephrasing?");
+                            currentAiMessage.setText("Oops, I didn’t quite catch that. Could you try rephrasing?");
                             chatAdapter.notifyItemChanged(thinkingMessagePosition);
                         } else {
-                            addMessage(new ChatMessage("AI", "Hmm... I didn't get that. Try rephrasing?", false));
+                            addMessage(new ChatMessage("AI", "Sorry, I didn’t quite get that. Could you try rephrasing?", false));
                         }
                     }
 
@@ -429,11 +425,11 @@ public class StyleFragment extends Fragment {
                 fetchOutfitImagesFromWeb(lastRecommendationQuery);
                 lastRecommendationQuery = null;
             } else {
-                addMessage(new ChatMessage("AI", "Okay, but I don't have a specific recommendation to show images for right now.", false));
+                addMessage(new ChatMessage("AI", "Got it! I just don’t have any image ideas to share at the moment.", false));
                 chatRecyclerView.scrollToPosition(viewModel.getMessageList().size() - 1);
             }
         } else {
-            addMessage(new ChatMessage("AI", "Okay, I won't show images then.", false));
+            addMessage(new ChatMessage("AI", "Alright, I won’t show any images then.", false));
             chatRecyclerView.scrollToPosition(viewModel.getMessageList().size() - 1);
             awaitingImageConfirmation = false;
             lastRecommendationQuery = null;
@@ -516,8 +512,8 @@ public class StyleFragment extends Fragment {
         if (query == null || query.trim().isEmpty()) {
             Log.w(TAG, "Attempted to fetch images with empty query.");
             requireActivity().runOnUiThread(() -> {
-                addMessage(new ChatMessage("AI", "Sorry, I couldn't find a specific query for images right now.", false));
-                // Using notifyItemInserted after addMessage is important for the adapter to know a new item exists.
+                addMessage(new ChatMessage("AI", "Sorry, I couldn't find anything to show images for right now.", false));
+
                 chatAdapter.notifyItemInserted(viewModel.getMessageList().size() - 1);
                 chatRecyclerView.scrollToPosition(viewModel.getMessageList().size() - 1);
             });

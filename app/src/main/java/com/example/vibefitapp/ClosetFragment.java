@@ -53,6 +53,8 @@ public class ClosetFragment extends Fragment {
     // Firebase
     private FirebaseAuth auth;
     private FirebaseFirestore firestore;
+    private boolean hasShownLoginDialog = false;
+
 
     @Override
     public View onCreateView(
@@ -106,7 +108,10 @@ public class ClosetFragment extends Fragment {
     private void loadUserData() {
         FirebaseUser firebaseUser = auth.getCurrentUser();
         if (firebaseUser == null) {
-            showLoginRequiredDialog();
+            if (!hasShownLoginDialog) {
+                showLoginRequiredDialog();
+                hasShownLoginDialog = true;
+            }
 
             genderText.setText("--");
             heightData.setText("--");
@@ -126,6 +131,7 @@ public class ClosetFragment extends Fragment {
             userAvatar.setImageResource(R.drawable.ic_avatar_placeholder);
             return;
         }
+        hasShownLoginDialog = false;
 
         firestore.collection("users")
                 .document(firebaseUser.getUid())
@@ -281,6 +287,11 @@ public class ClosetFragment extends Fragment {
     }
 
     private void openAiTryOn() {
+        if (auth.getCurrentUser() == null) {
+            showLoginRequiredDialog();
+            return;
+        }
+
         Intent intent = new Intent(requireContext(), AiTryOnActivity.class);
         startActivity(intent);
     }

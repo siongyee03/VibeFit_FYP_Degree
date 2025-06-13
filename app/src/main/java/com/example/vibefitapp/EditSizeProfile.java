@@ -36,7 +36,7 @@ public class EditSizeProfile extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         if (mAuth.getCurrentUser() == null) {
-            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please log in to continue.", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -117,7 +117,7 @@ public class EditSizeProfile extends AppCompatActivity {
                     }
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Failed to load size profile", Toast.LENGTH_SHORT).show());
+                        Toast.makeText(this, "Couldn't load your size profile. Please try again.", Toast.LENGTH_SHORT).show());
     }
 
     private void saveSizeProfile() {
@@ -137,7 +137,7 @@ public class EditSizeProfile extends AppCompatActivity {
         }
 
         if (TextUtils.isEmpty(height) && TextUtils.isEmpty(weight) && TextUtils.isEmpty(shoeSize)) {
-            Toast.makeText(this, "No size data to save", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "You haven't entered any size data to save.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -145,7 +145,7 @@ public class EditSizeProfile extends AppCompatActivity {
                 .collection("size_profile").document("detailed")
                 .set(sizeMap, SetOptions.merge())
                 .addOnSuccessListener(unused ->
-                        Toast.makeText(this, "Size profile saved", Toast.LENGTH_SHORT).show())
+                        Toast.makeText(this, "Your size profile has been saved.", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed to save: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }

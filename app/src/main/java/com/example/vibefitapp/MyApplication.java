@@ -2,6 +2,7 @@ package com.example.vibefitapp;
 
 import android.app.Application;
 import android.util.Log;
+
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.ai.BuildConfig;
 import com.google.firebase.ai.FirebaseAI;
@@ -24,6 +25,29 @@ public class MyApplication extends Application {
         super.onCreate();
         FirebaseApp.initializeApp(this);
 
+
+        FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
+
+
+        firebaseAppCheck.installAppCheckProviderFactory(
+                DebugAppCheckProviderFactory.getInstance()
+        );
+        Log.d(TAG, "Firebase App Check initialized with Debug Provider.");
+
+            /*
+            firebaseAppCheck.installAppCheckProviderFactory(
+                    PlayIntegrityAppCheckProviderFactory.getInstance());
+            Log.d(TAG, "Firebase App Check initialized with Play Integrity Provider.");
+            */
+
+
+        FirebaseAppCheck.getInstance().getToken(false)
+                .addOnSuccessListener(tokenResponse -> {
+                    Log.d(TAG, "App Check token is valid now. Ready to call AI.");
+                })
+                .addOnFailureListener(exception -> {
+                    Log.e(TAG, "Failed to get App Check token.", exception);
+                });
 
         /*
             com.google.firebase.auth.FirebaseAuth.getInstance().useEmulator("10.0.2.2", 9099);
@@ -55,17 +79,6 @@ public class MyApplication extends Application {
                         requestOptions
                 );
         model = GenerativeModelFutures.from(gm);
-
-        /*
-        FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
-        firebaseAppCheck.installAppCheckProviderFactory(
-                DebugAppCheckProviderFactory.getInstance()
-        );
-        Log.d(TAG, "Firebase App Check initialized with Debug Provider.");
-        */
-        FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
-        firebaseAppCheck.installAppCheckProviderFactory(
-                PlayIntegrityAppCheckProviderFactory.getInstance());
 
     }
 

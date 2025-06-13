@@ -73,7 +73,7 @@ public class UploadPostActivity extends AppCompatActivity {
                 imageUris,
                 position -> {
                     if (imageUris.size() == 1) {
-                        Toast.makeText(this, "At least one image is required.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Add at least one photo to continue.", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     imageUris.remove(position);
@@ -241,7 +241,7 @@ public class UploadPostActivity extends AppCompatActivity {
 
     private void selectMedia() {
         if (isEditMode) {
-            Toast.makeText(this, "Editing mode: cannot add new media, only delete existing ones.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Edit mode is on. You can’t add new media now.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -259,26 +259,26 @@ public class UploadPostActivity extends AppCompatActivity {
         String description = descriptionInput.getText().toString().trim();
 
         if (title.isEmpty()) {
-            Toast.makeText(this, "Please enter title.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please add a title.", Toast.LENGTH_SHORT).show();
             postButton.setEnabled(true);
             return;
         }
 
         if (description.isEmpty()) {
-            Toast.makeText(this, "Please enter description.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please add a description.", Toast.LENGTH_SHORT).show();
             postButton.setEnabled(true);
             return;
         }
 
         if (imageUris.isEmpty()) {
-            Toast.makeText(this, "Please select media.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please select at least one media file.", Toast.LENGTH_SHORT).show();
             postButton.setEnabled(true);
             return;
         }
 
         FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser == null) {
-            Toast.makeText(this, "You must be logged in to post.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "You're not logged in. Please sign in to post.", Toast.LENGTH_SHORT).show();
             postButton.setEnabled(true);
             return;
         }
@@ -308,13 +308,13 @@ public class UploadPostActivity extends AppCompatActivity {
                                 .update(updates)
                                 .addOnSuccessListener(aVoid -> {
                                     uploadProgress.setVisibility(View.GONE);
-                                    Toast.makeText(this, "Post updated successfully.", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(this, "Post updated!", Toast.LENGTH_SHORT).show();
                                     finish();
                                 })
                                 .addOnFailureListener(e -> {
                                     uploadProgress.setVisibility(View.GONE);
                                     postButton.setEnabled(true);
-                                    Toast.makeText(this, "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(this, "Update failed. Please try again.", Toast.LENGTH_SHORT).show();
                                 });
                     } else {
                         List<String> uploadedUrls = new ArrayList<>();
@@ -336,7 +336,7 @@ public class UploadPostActivity extends AppCompatActivity {
                             firestore.collection("posts").add(post)
                                     .addOnSuccessListener(ref -> {
                                         uploadProgress.setVisibility(View.GONE);
-                                        Toast.makeText(this, "Upload Successful", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(this, "Uploaded successfully.", Toast.LENGTH_SHORT).show();
                                         Intent intent = new Intent(this, HomeActivity.class);
                                         intent.putExtra("target_tab", getIntent().getStringExtra("source_tab"));
                                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);

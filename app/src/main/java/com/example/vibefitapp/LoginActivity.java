@@ -141,14 +141,14 @@ public class LoginActivity extends AppCompatActivity {
                                                 } else {
                                                     intent = new Intent(LoginActivity.this, HomeActivity.class);
                                                 }
-                                                Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(LoginActivity.this, "Logged in successfully.", Toast.LENGTH_SHORT).show();
                                                 startActivity(intent);
                                                 finish();
                                             } else {
-                                                Toast.makeText(this, "Role not defined. Contact support.", Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(this, "Account setup incomplete. Please reach out to support.", Toast.LENGTH_SHORT).show();
                                             }
                                         } else {
-                                            Toast.makeText(this, "User record not found.", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(this, "Account not found. Please check your login info.", Toast.LENGTH_SHORT).show();
                                         }
                                     })
                                     .addOnFailureListener(e -> Toast.makeText(this, "Failed to fetch user role: " + e.getMessage(), Toast.LENGTH_SHORT).show());
@@ -159,13 +159,13 @@ public class LoginActivity extends AppCompatActivity {
                             if (user != null) {
                                 user.sendEmailVerification().addOnCompleteListener(sendTask -> {
                                     if (sendTask.isSuccessful()) {
-                                        Toast.makeText(LoginActivity.this, "Verification email resent", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(LoginActivity.this, "Verification email sent again. Please check your inbox.", Toast.LENGTH_SHORT).show();
                                     } else {
-                                        Toast.makeText(LoginActivity.this, "Failed to send verification email", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(LoginActivity.this, "Failed to send verification email. Please try again.", Toast.LENGTH_SHORT).show();
                                     }
                                 });
                             } else {
-                                Toast.makeText(LoginActivity.this, "Could not resend verification email.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(LoginActivity.this, "Unable to resend verification email at this time. Please contact support if the issue continues.", Toast.LENGTH_SHORT).show();
                             }
                         }
 

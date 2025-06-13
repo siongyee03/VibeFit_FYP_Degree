@@ -23,6 +23,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 
 import androidx.annotation.Nullable;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -62,7 +63,6 @@ public class RegisterActivity extends AppCompatActivity {
         // Initialize Firebase Storage
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
-        //storageReference = FirebaseStorage.getInstance().getReference();
 
         // Initializing views
         TextView passwordRequirements = findViewById(R.id.password_requirements);
@@ -103,8 +103,11 @@ public class RegisterActivity extends AppCompatActivity {
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                        Intent data = result.getData();
-                        selectedImageUri = data.getData();
+                        selectedImageUri = result.getData().getData();
+                        Glide.with(RegisterActivity.this)
+                                .load(selectedImageUri)
+                                .circleCrop()
+                                .into(ivAvatar);
                         try {
                             Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
                             ivAvatar.setImageBitmap(bitmap);
@@ -178,9 +181,8 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private boolean isPasswordValid(String password) {
-        return password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{8,}$");
+        return password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$");
     }
-
 
     // Open Image Picker
     private void openImagePicker() {
@@ -226,8 +228,7 @@ public class RegisterActivity extends AppCompatActivity {
                         FirebaseUser user = mAuth.getCurrentUser();
 
                         if (user == null) {
-                            Toast.makeText(RegisterActivity.this, "Registration succeeded, but user is null. Try logging in.",
-                                    Toast.LENGTH_LONG).show();
+                            Toast.makeText(RegisterActivity.this, "You're registered! Please log in to continue.", Toast.LENGTH_LONG).show();
                             startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
                             finish();
                             return;
@@ -249,8 +250,9 @@ public class RegisterActivity extends AppCompatActivity {
                     } else {
                         Exception e = task.getException();
                         if (e != null) {
-                            Toast.makeText(RegisterActivity.this, "Registration failed: " + e.getMessage(),
-                                    Toast.LENGTH_LONG).show();
+                            Log.e("RegisterActivity", "Registration failed: " + e.getMessage(), e);
+                            Toast.makeText(RegisterActivity.this, "Sorry, we couldn't complete your registration. Please try again.",
+                                    Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -264,15 +266,16 @@ public class RegisterActivity extends AppCompatActivity {
             try {
                 Bitmap originalBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
 
-                int targetWidth = 512;
-                Bitmap bitmapToUpload;
-                if (originalBitmap.getWidth() > targetWidth) {
-                    float aspectRatio = (float) originalBitmap.getHeight() / originalBitmap.getWidth();
-                    int targetHeight = Math.round(targetWidth * aspectRatio);
-                    bitmapToUpload = Bitmap.createScaledBitmap(originalBitmap, targetWidth, targetHeight, true);
-                } else {
-                    bitmapToUpload = originalBitmap;
-                }
+                int width = originalBitmap.getWidth();
+                int height = originalBitmap.getHeight();
+                int newEdge = Math.min(width, height);
+                int xOffset = (width - newEdge) / 2;
+                int yOffset = (height - newEdge) / 2;
+
+                Bitmap croppedBitmap = Bitmap.createBitmap(originalBitmap, xOffset, yOffset, newEdge, newEdge);
+
+                int targetSize = 512;
+                Bitmap bitmapToUpload = Bitmap.createScaledBitmap(croppedBitmap, targetSize, targetSize, true);
 
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 bitmapToUpload.compress(Bitmap.CompressFormat.JPEG, 20, baos);
@@ -288,8 +291,8 @@ public class RegisterActivity extends AppCompatActivity {
                         storeUserInfo(user, username, null, selectedGender);
                     });
                 }).addOnFailureListener(e -> {
-                    Log.e(TAG, "Image upload failed", e);
-                    Toast.makeText(RegisterActivity.this, "Image upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e("RegisterActivity", "Image upload failed: " + e.getMessage(), e);
+                    Toast.makeText(RegisterActivity.this, "Sorry, we couldn't upload your image. Please try again.", Toast.LENGTH_SHORT).show();
                     storeUserInfo(user, username, null, selectedGender);
                 });
             } catch (IOException e) {
@@ -329,8 +332,7 @@ public class RegisterActivity extends AppCompatActivity {
                     // email verification
                     user.sendEmailVerification().addOnCompleteListener(sendTask -> {
                         if (sendTask.isSuccessful()) {
-                            Toast.makeText(RegisterActivity.this, "Verification email sent. Please check your inbox.",
-                                    Toast.LENGTH_LONG).show();
+                            Toast.makeText(RegisterActivity.this, "We've sent a verification email. Please check your inbox or spam folder to activate your account.", Toast.LENGTH_LONG).show();
 
                             mAuth.signOut();
 
@@ -345,8 +347,7 @@ public class RegisterActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     Log.w("RegisterActivity", "Error adding document", e);
-                    Toast.makeText(RegisterActivity.this, "Failed to store user.",
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterActivity.this, "Oops! Something went wrong while saving your account. Please try again.", Toast.LENGTH_SHORT).show();
                 });
     }
 }

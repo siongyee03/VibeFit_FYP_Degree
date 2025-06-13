@@ -60,7 +60,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 public class AiTryOnActivity extends AppCompatActivity {
-    
+
+    private View loadingOverlay;
+
     private ImageView imgUserModel;
     private RecyclerView recyclerOutfit;
     private LinearLayout placeholderContainer;
@@ -94,6 +96,7 @@ public class AiTryOnActivity extends AppCompatActivity {
         recyclerOutfit = findViewById(R.id.recycler_outfit_grid);
         placeholderContainer = findViewById(R.id.placeholder_container);
         tabLayout = findViewById(R.id.tab_layout);
+        loadingOverlay = findViewById(R.id.loadingOverlay);
 
         btnUploadOverlay = findViewById(R.id.btn_upload_overlay);
         btnChangeModel = findViewById(R.id.btn_change_model);
@@ -215,6 +218,14 @@ public class AiTryOnActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+    private void showLoading() {
+        runOnUiThread(() -> loadingOverlay.setVisibility(View.VISIBLE));
+    }
+
+    private void hideLoading() {
+        runOnUiThread(() -> loadingOverlay.setVisibility(View.GONE));
     }
 
     private void showUploadOrCameraDialog() {
@@ -620,6 +631,8 @@ public class AiTryOnActivity extends AppCompatActivity {
     }
 
     private void startTryOnProcess(String outfitImageUrl) {
+        showLoading();
+
         if (userGlamModelUrl != null && !userGlamModelUrl.isEmpty()) {
 
             sendTryOnRequest(userGlamModelUrl, outfitImageUrl, eventId -> {
@@ -750,6 +763,8 @@ public class AiTryOnActivity extends AppCompatActivity {
                                     Log.d("TryOnResult", "Final Try-on Result URL: " + outputUrl);
 
                                     runOnUiThread(() -> {
+                                        hideLoading();
+
                                         Glide.with(AiTryOnActivity.this)
                                                 .load(outputUrl)
                                                 .listener(new RequestListener<>() {
@@ -786,7 +801,10 @@ public class AiTryOnActivity extends AppCompatActivity {
                                 }
                                 return;
                             } else if ("FAILED".equalsIgnoreCase(status)) {
-                                runOnUiThread(() -> Toast.makeText(AiTryOnActivity.this, "Try-on failed", Toast.LENGTH_SHORT).show());
+                                runOnUiThread(() -> {
+                                    hideLoading();
+                                    Toast.makeText(AiTryOnActivity.this, "Try-on failed", Toast.LENGTH_SHORT).show();
+                                });
                                 return;
                             }
                         }

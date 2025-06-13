@@ -94,11 +94,10 @@
     <string name="male">Male</string>
     <string name="female">Female</string>
     <string name="unknown">Unknown</string>
-    <string name="size_profile_deleted">Size Profile data deleted</string>
-    <string name="size_profile_delete_failed">Failed to delete data</string>
-    <string name="add_size_profile">Add Your Size Profile</string>
-    <string name="user_data_load_failed">Failed to load user data</string>
-    <string name="please_login_first">Please log in first.</string>
+    <string name="size_profile_deleted">Size profile deleted.</string>
+    <string name="size_profile_delete_failed">Couldn\'t delete size data. Try again.</string>
+    <string name="add_size_profile">No size data found. Please add your size profile.</string>
+    <string name="user_data_load_failed">Couldn\'t load your profile. Please try again.</string>
 
     <!--Edit Size Profile-->
     <string name="edit_size_profile">Edit Size Profile</string>
@@ -191,4 +190,5 @@
     <string name="role_admin_or_superadmin">Role (admin or superadmin)</string>
     <string name="admin_id">Admin ID</string>
     <string name="password_requirements">• Minimum 8 characters\n• At least 1 uppercase letter\n• At least 1 lowercase letter\n• At least 1 number</string>
+    <string name="processing_try_on">Almost ready! Trying on your outfit...</string>
 </resources>
