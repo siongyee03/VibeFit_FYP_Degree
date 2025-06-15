@@ -88,19 +88,23 @@
                 android:id="@+id/forgotPassword"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
                 android:layout_gravity="end"
+                android:clickable="true"
+                android:focusable="true"
+                android:fontFamily="@font/roboto_mono_regular"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:minHeight="48dp"
+                android:padding="8dp"
                 android:text="@string/forgot_password"
-                android:textColor="#B3000000"
-                android:textSize="16sp"
-                android:fontFamily="@font/roboto_mono_regular" />
+                android:textColor="@color/purple_main"
+                android:textSize="16sp" />
 
             <!-- Login Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/loginButton"
                 android:layout_width="match_parent"
                 android:layout_height="55dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="16dp"
                 style="@style/ButtonStyle"
                 android:text="@string/login"
                 android:textAllCaps="true"
@@ -131,6 +135,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/roboto_mono_regular"
                     android:text="@string/register_now"
+                    android:foreground="?attr/selectableItemBackgroundBorderless"
                     android:textColor="@color/purple_main"
                     android:textSize="16sp" />
             </LinearLayout>

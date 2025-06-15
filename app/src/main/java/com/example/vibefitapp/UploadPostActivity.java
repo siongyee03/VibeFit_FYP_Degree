@@ -1,6 +1,7 @@
 package com.example.vibefitapp;
 
 import android.app.AlertDialog;
+import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.*;
+
 import android.text.Editable;
 import android.text.TextWatcher;
 
@@ -78,10 +80,14 @@ public class UploadPostActivity extends AppCompatActivity {
                     }
                     imageUris.remove(position);
                     adapter.notifyItemRemoved(position);
+                    if (imageUris.isEmpty()) {
+                        imageRecycler.setVisibility(View.GONE);
+                    }
                 },
                 this::showImagePreviewDialog,
                 this::selectMedia
         );
+        imageRecycler.setAdapter(adapter);
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -112,16 +118,31 @@ public class UploadPostActivity extends AppCompatActivity {
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Intent data = result.getData();
-                        Uri uri = data.getData();
-                        if (uri == null) return;
-                        String type = getContentResolver().getType(uri);
+                        if (data.getClipData() != null) {
+                            ClipData clipData = data.getClipData();
+                            int currentImageCount = imageUris.size();
+                            for (int i = 0; i < clipData.getItemCount(); i++) {
+                                if (currentImageCount + i < MAX_IMAGE_COUNT) {
+                                    Uri uri = clipData.getItemAt(i).getUri();
 
-                        if (type != null && type.startsWith("image")) {
-                            if (imageUris.size() < MAX_IMAGE_COUNT) {
-                                imageUris.add(uri);
+                                    imageUris.add(uri);
+                                } else {
+                                    Toast.makeText(this, "You can select up to " + MAX_IMAGE_COUNT + " images.", Toast.LENGTH_SHORT).show();
+                                    break;
+                                }
+                            }
+                        } else if (data.getData() != null) {
+                            Uri uri = data.getData();
+                            String type = getContentResolver().getType(uri);
+
+                            if (type != null && type.startsWith("image")) {
+                                if (imageUris.size() < MAX_IMAGE_COUNT) {
+                                    imageUris.add(uri);
+                                } else {
+                                    Toast.makeText(this, "You can select up to " + MAX_IMAGE_COUNT + " images.", Toast.LENGTH_SHORT).show();
+                                }
                             }
                         }
-
                         updateMediaPreview();
                     }
                 }
@@ -137,8 +158,13 @@ public class UploadPostActivity extends AppCompatActivity {
                 }
             }
 
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
         });
 
         descriptionInput.addTextChangedListener(new TextWatcher() {
@@ -151,8 +177,13 @@ public class UploadPostActivity extends AppCompatActivity {
                 }
             }
 
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
         });
 
         //edit post
@@ -177,12 +208,10 @@ public class UploadPostActivity extends AppCompatActivity {
             }
 
             List<String> mediaUrls = editingPost.getMediaUrls();
-            if (editingPost.getMediaType() != null && editingPost.getMediaType().equals("video")) {
-                if (!mediaUrls.isEmpty()) {
-                    imageUris.clear();
-                }
-            } else {
+
+            if (editingPost.getMediaType() != null && editingPost.getMediaType().equals("image")) {
                 imageUris.clear();
+
                 for (String url : mediaUrls) {
                     imageUris.add(Uri.parse(url));
                 }
@@ -217,9 +246,6 @@ public class UploadPostActivity extends AppCompatActivity {
                 categories
         );
         categorySpinner.setAdapter(adapter);
-
-        String sourceTab = getIntent().getStringExtra("source_tab");
-        suggestCategory(sourceTab);
     }
 
     private void suggestCategory(String tab) {
@@ -242,6 +268,11 @@ public class UploadPostActivity extends AppCompatActivity {
     private void selectMedia() {
         if (isEditMode) {
             Toast.makeText(this, "Edit mode is on. You can’t add new media now.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (imageUris.size() >= MAX_IMAGE_COUNT) {
+            Toast.makeText(this, "You have reached the maximum of " + MAX_IMAGE_COUNT + " images.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -298,9 +329,9 @@ public class UploadPostActivity extends AppCompatActivity {
                         updates.put("category", categorySpinner.getSelectedItem().toString());
                         List<String> currentMediaUrls = new ArrayList<>();
 
-                            for (Uri uri : imageUris) {
-                                currentMediaUrls.add(uri.toString());
-                            }
+                        for (Uri uri : imageUris) {
+                            currentMediaUrls.add(uri.toString());
+                        }
 
                         updates.put("mediaUrls", currentMediaUrls);
 
@@ -332,6 +363,7 @@ public class UploadPostActivity extends AppCompatActivity {
                             post.put("timestamp", FieldValue.serverTimestamp());
                             post.put("likeCount", 0);
                             post.put("favouriteCount", 0);
+                            post.put("commentCount", 0);
 
                             firestore.collection("posts").add(post)
                                     .addOnSuccessListener(ref -> {

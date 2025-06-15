@@ -1,7 +1,6 @@
 package com.example.vibefitapp;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -25,7 +24,7 @@ public class MeFragment extends Fragment {
 
     private ImageView imgUserAvatar;
     private TextView tvUsername;
-    private ConstraintLayout cardUserInfo, cardFavourite, cardSettings;
+    private ConstraintLayout cardUserInfo, cardFavourite, cardSettings, cardPosts;
 
     private FirebaseAuth firebaseAuth;
     private ListenerRegistration userListener;
@@ -47,6 +46,7 @@ public class MeFragment extends Fragment {
         cardUserInfo = view.findViewById(R.id.cardUserInfo);
         cardFavourite = view.findViewById(R.id.cardFavourite);
         cardSettings = view.findViewById(R.id.cardSettings);
+        cardPosts = view.findViewById(R.id.cardPosts);
 
         setupUserInfoListener();
         setupCardsClick();
@@ -66,11 +66,13 @@ public class MeFragment extends Fragment {
                             String username = documentSnapshot.getString("username");
 
                             if (imageUrl != null && !imageUrl.isEmpty()) {
-                                Glide.with(this)
-                                        .load(imageUrl)
-                                        .placeholder(R.drawable.ic_avatar_placeholder)
-                                        .circleCrop()
-                                        .into(imgUserAvatar);
+                                if (isAdded()) {
+                                    Glide.with(requireContext())
+                                            .load(imageUrl)
+                                            .placeholder(R.drawable.ic_avatar_placeholder)
+                                            .circleCrop()
+                                            .into(imgUserAvatar);
+                                }
                             } else {
                                 imgUserAvatar.setImageResource(R.drawable.ic_avatar_placeholder);
                             }
@@ -78,15 +80,13 @@ public class MeFragment extends Fragment {
                             if (username != null && !username.isEmpty()) {
                                 tvUsername.setText(username);
                             } else {
-                                tvUsername.setText("Anonymous");
+                                tvUsername.setText(R.string.anonymous);
                             }
                         } else {
                             showDefaultUserInfo();
                         }
                     })
-                    .addOnFailureListener(e -> {
-                        showDefaultUserInfo();
-                    });
+                    .addOnFailureListener(e -> showDefaultUserInfo());
         } else {
             showDefaultUserInfo();
         }
@@ -110,6 +110,15 @@ public class MeFragment extends Fragment {
         cardFavourite.setOnClickListener(v -> {
             if (firebaseAuth.getCurrentUser() != null) {
                 Intent intent = new Intent(requireContext(), FavouritePostsActivity.class);
+                startActivity(intent);
+            } else {
+                Toast.makeText(requireContext(), R.string.please_log_in_first, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        cardPosts.setOnClickListener(v -> {
+            if (firebaseAuth.getCurrentUser() != null) {
+                Intent intent = new Intent(requireContext(), UserPostsActivity.class);
                 startActivity(intent);
             } else {
                 Toast.makeText(requireContext(), R.string.please_log_in_first, Toast.LENGTH_SHORT).show();

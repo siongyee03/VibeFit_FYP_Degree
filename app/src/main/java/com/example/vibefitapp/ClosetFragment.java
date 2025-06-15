@@ -54,6 +54,7 @@ public class ClosetFragment extends Fragment {
     private FirebaseAuth auth;
     private FirebaseFirestore firestore;
     private boolean hasShownLoginDialog = false;
+    private boolean hasShownMissingSizeToast = false;
 
 
     @Override
@@ -165,7 +166,10 @@ public class ClosetFragment extends Fragment {
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(requireContext(), getString(R.string.user_data_load_failed), Toast.LENGTH_SHORT).show();
+                    if (!hasShownMissingSizeToast) {
+                        Toast.makeText(requireContext(), getString(R.string.add_size_profile), Toast.LENGTH_SHORT).show();
+                        hasShownMissingSizeToast = true;
+                    }
                     userAvatar.setImageResource(R.drawable.ic_avatar_placeholder);
                 });
 
@@ -194,8 +198,13 @@ public class ClosetFragment extends Fragment {
 
                     String bandSize = documentSnapshot.getString("braBandSize");
                     String cupSize = documentSnapshot.getString("braCup");
-                    String formattedBraSize = getString(R.string.bra_size_format, bandSize, cupSize);
-                    braSizeData.setText(formattedBraSize);
+
+                    if ((bandSize != null && !bandSize.trim().isEmpty()) || (cupSize != null && !cupSize.trim().isEmpty())) {
+                        String displayBraSize = (bandSize != null ? bandSize : "") + (cupSize != null ? cupSize : "");
+                        braSizeData.setText(displayBraSize);
+                    } else {
+                        braSizeData.setText("--");
+                    }
 
                     heightData.setText(formatWithUnit(documentSnapshot.getString("height"), "Cm"));
                     weightData.setText(formatWithUnit(documentSnapshot.getString("weight"), "Kg"));
@@ -265,7 +274,8 @@ public class ClosetFragment extends Fragment {
                         "height", null,
                         "weight", null,
                         "shoeSize", null,
-                        "braSize", null,
+                        "braBandSize", null,
+                        "braCup", null,
                         "shoulder", null,
                         "armLength", null,
                         "bust", null,
@@ -315,6 +325,7 @@ public class ClosetFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        hasShownMissingSizeToast = false;
         loadUserData();
     }
 

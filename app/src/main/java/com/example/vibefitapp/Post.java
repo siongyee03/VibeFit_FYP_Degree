@@ -7,6 +7,7 @@ import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Post implements Parcelable {
     private String username;
@@ -23,9 +24,11 @@ public class Post implements Parcelable {
     private String mediaType;
     private String userId;
     private Timestamp timestamp;
+    private int commentCount;
 
     public Post() {
         mediaUrls = new ArrayList<>();
+        this.commentCount = 0;
     }
 
     protected Post(Parcel in) {
@@ -42,6 +45,7 @@ public class Post implements Parcelable {
         userId = in.readString();
         content = in.readString();
         timestamp = in.readParcelable(Timestamp.class.getClassLoader());
+        commentCount = in.readInt();
     }
 
     public static final Creator<Post> CREATOR = new Creator<Post>() {
@@ -77,6 +81,7 @@ public class Post implements Parcelable {
         parcel.writeString(userId);
         parcel.writeString(content);
         parcel.writeParcelable(timestamp, i);
+        parcel.writeInt(commentCount);
     }
 
     // Getters and Setters
@@ -118,4 +123,49 @@ public class Post implements Parcelable {
 
     public Timestamp getTimestamp() { return timestamp; }
     public void setTimestamp(Timestamp timestamp) { this.timestamp = timestamp; }
+
+    public int getCommentCount() { return commentCount; }
+    public void setCommentCount(int commentCount) { this.commentCount = commentCount; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Post post = (Post) o;
+
+        if (timestampSeconds != post.timestampSeconds) return false;
+        if (likeCount != post.likeCount) return false;
+        if (favouriteCount != post.favouriteCount) return false;
+        if (commentCount != post.commentCount) return false;
+        if (!username.equals(post.username)) return false;
+        if (!userAvatar.equals(post.userAvatar)) return false;
+        if (!category.equals(post.category)) return false;
+        if (!title.equals(post.title)) return false;
+        if (!content.equals(post.content)) return false;
+        if (!mediaUrls.equals(post.mediaUrls)) return false;
+        if (!id.equals(post.id)) return false;
+        if (!mediaType.equals(post.mediaType)) return false;
+        if (!userId.equals(post.userId)) return false;
+        return Objects.equals(timestamp, post.timestamp);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = username.hashCode();
+        result = 31 * result + userAvatar.hashCode();
+        result = 31 * result + category.hashCode();
+        result = 31 * result + Long.hashCode(timestampSeconds);
+        result = 31 * result + title.hashCode();
+        result = 31 * result + content.hashCode();
+        result = 31 * result + likeCount;
+        result = 31 * result + mediaUrls.hashCode();
+        result = 31 * result + id.hashCode();
+        result = 31 * result + favouriteCount;
+        result = 31 * result + mediaType.hashCode();
+        result = 31 * result + userId.hashCode();
+        result = 31 * result + (timestamp != null ? timestamp.hashCode() : 0);
+        result = 31 * result + commentCount;
+        return result;
+    }
 }

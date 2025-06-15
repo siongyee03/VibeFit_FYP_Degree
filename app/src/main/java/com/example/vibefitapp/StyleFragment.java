@@ -84,7 +84,8 @@ public class StyleFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        viewModel = new ViewModelProvider(this).get(StyleViewModel.class);
+        StyleViewModelFactory factory = new StyleViewModelFactory();
+        viewModel = new ViewModelProvider(this, factory).get(StyleViewModel.class);
 
         // Initialize the ActivityResultLauncher for picking images
         pickImageLauncher = registerForActivityResult(
@@ -198,7 +199,7 @@ public class StyleFragment extends Fragment {
         int newHeight = (int) (height * scale);
 
         if (newWidth <= 0 || newHeight <= 0 || (newWidth == width && newHeight == height)) {
-            return original; // Return original if scaled dimensions are invalid or no scaling occurred
+            return original;
         }
 
         try {
@@ -389,7 +390,11 @@ public class StyleFragment extends Fragment {
 
                     String finalAiResponse = aiResponseBuilder.toString().trim();
 
-                    if (finalAiResponse.toLowerCase().contains("would you like") && finalAiResponse.toLowerCase().contains("image")) {
+                    if (finalAiResponse.toLowerCase().contains("would you like") &&
+                            (finalAiResponse.toLowerCase().contains("image") ||
+                                    finalAiResponse.toLowerCase().contains("example") ||
+                                    finalAiResponse.toLowerCase().contains("picture") ||
+                                    finalAiResponse.toLowerCase().contains("visual"))) {
                         finalAiResponse += "\n\nJust let me know if you'd like to see related pictures! 😊";
                         awaitingImageConfirmation = true;
 
@@ -461,7 +466,7 @@ public class StyleFragment extends Fragment {
             String lowerResponse = aiResponse.toLowerCase();
             List<String> triggers = Arrays.asList(
                     "would you like to see", "want to see", "should i show you", "do you want images",
-                    "shall i show you", "image", "picture", "photo"
+                    "shall i show you", "image", "picture", "photo", "example", "visual"
             );
 
             for (String trigger : triggers) {
@@ -523,7 +528,7 @@ public class StyleFragment extends Fragment {
         executor.execute(() -> {
             String apiKey = BuildConfig.UNSPLASH_API_KEY;
 
-            HttpURLConnection connection = null; // Initialize connection variable
+            HttpURLConnection connection = null;
             try {
 
                 String urlString = "https://api.unsplash.com/search/photos?query=" +

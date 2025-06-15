@@ -4,7 +4,6 @@ import android.app.Application;
 import android.util.Log;
 
 import com.google.firebase.FirebaseApp;
-import com.google.firebase.ai.BuildConfig;
 import com.google.firebase.ai.FirebaseAI;
 import com.google.firebase.ai.GenerativeModel;
 import com.google.firebase.ai.java.GenerativeModelFutures;
@@ -14,11 +13,12 @@ import com.google.firebase.ai.type.GenerativeBackend;
 import com.google.firebase.ai.type.RequestOptions;
 import com.google.firebase.appcheck.FirebaseAppCheck;
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory;
-import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory;
 
 public class MyApplication extends Application {
     private static final String TAG = "MyApplication";
     private static GenerativeModelFutures model;
+
+    private final String systemInstructionText = "Default fallback prompt";
 
     @Override
     public void onCreate() {
@@ -42,24 +42,22 @@ public class MyApplication extends Application {
 
 
         FirebaseAppCheck.getInstance().getToken(false)
-                .addOnSuccessListener(tokenResponse -> {
-                    Log.d(TAG, "App Check token is valid now. Ready to call AI.");
-                })
-                .addOnFailureListener(exception -> {
-                    Log.e(TAG, "Failed to get App Check token.", exception);
-                });
+                .addOnSuccessListener(tokenResponse -> Log.d(TAG, "App Check token is valid now. Ready to call AI."))
+                .addOnFailureListener(exception -> Log.e(TAG, "Failed to get App Check token.", exception));
 
-        /*
-            com.google.firebase.auth.FirebaseAuth.getInstance().useEmulator("10.0.2.2", 9099);
-            com.google.firebase.firestore.FirebaseFirestore.getInstance().useEmulator("10.0.2.2", 8080);
-            com.google.firebase.storage.FirebaseStorage.getInstance().useEmulator("10.0.2.2", 9199);
-        */
 
-        String systemInstructionText = "You are a friendly and helpful personal fashion assistant. " +
-                "Provide detailed outfit recommendations, styling tips, and fashion advice, including suggestions for hairstyles and accessories. " +
-                "Analyze user descriptions and uploaded clothing images to offer personalized advice. " +
-                "If a recommendation could be better understood with visual examples, politely ask at the end of your response if the user would like to see related images. " +
-                "Always be polite, warm, and encouraging.";
+        com.google.firebase.auth.FirebaseAuth.getInstance().useEmulator("10.0.2.2", 9099);
+        com.google.firebase.firestore.FirebaseFirestore.getInstance().useEmulator("10.0.2.2", 8080);
+        com.google.firebase.storage.FirebaseStorage.getInstance().useEmulator("10.0.2.2", 9199);
+
+
+        String systemInstructionText = "You are a helpful and concise fashion assistant. " +
+                "Only respond to questions related to fashion, clothing, personal style, or outfit advice. " +
+                "If a question is unrelated, politely say: 'I'm here to help with fashion and style questions!' " +
+                "Provide outfit ideas, styling tips, and accessory suggestions based on the user's input, photos. " +
+                "Keep your responses professional and personalized. " +
+                "If a visual example would be helpful, ask at the end if the user would like to see one. [query_options: query1; query2; query3] " +
+                "Be warm, polite, and supportive. ";
 
         Content systemInstructionContent = new Content.Builder()
                 .addText(systemInstructionText)

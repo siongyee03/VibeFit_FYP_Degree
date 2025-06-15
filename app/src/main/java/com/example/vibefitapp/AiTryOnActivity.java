@@ -68,9 +68,7 @@ public class AiTryOnActivity extends AppCompatActivity {
     private LinearLayout placeholderContainer;
     private TabLayout tabLayout;
     private Uri userFaceUri;
-    private String selectedBodyType = "All";
     private OutfitAdapter outfitAdapter;
-    private final List<Outfit> allOutfits = new ArrayList<>();
     private final List<Outfit> userUploadedOutfits = new ArrayList<>();
 
     private String userGender = "Prefer not to say";
@@ -83,7 +81,6 @@ public class AiTryOnActivity extends AppCompatActivity {
     private String userGlamMediaUrl;
     private String userGlamModelUrl = null;
     private String userFaceImageUrl;
-    private String currentTab = "All";
     private boolean isGlamModelReady = false;
 
 
@@ -152,7 +149,6 @@ public class AiTryOnActivity extends AppCompatActivity {
         setupTabs();
 
         loadUserInfo();
-        fetchOutfits();
         fetchUserUploadedOutfits();
 
         boolean hasNew = getSharedPreferences("ai_tryon_cache", MODE_PRIVATE)
@@ -162,13 +158,7 @@ public class AiTryOnActivity extends AppCompatActivity {
                     .edit().putBoolean("hasNewUploads", false).apply();
         }
 
-        btnUploadOverlay.setOnClickListener(v -> {
-            if (!"Male".equalsIgnoreCase(userGender) && !"Female".equalsIgnoreCase(userGender)) {
-                showGenderSelectDialog();
-            } else {
-                showUploadOrCameraDialog();
-            }
-        });
+        btnUploadOverlay.setOnClickListener(v -> showUploadOrCameraDialog());
 
         btnChangeModel.setOnClickListener(v -> {
             if (!"Male".equalsIgnoreCase(userGender) && !"Female".equalsIgnoreCase(userGender)) {
@@ -285,10 +275,17 @@ public class AiTryOnActivity extends AppCompatActivity {
                                         userGlamModelUrl = uploadedGlamUrl;
                                         isGlamModelReady = true;
 
-                                        FirebaseFirestore.getInstance()
-                                                .collection("users")
-                                                .document(uid)
-                                                .update("glamMediaUrl", uploadedGlamUrl);
+                                        if (!"Prefer not to say".equalsIgnoreCase(userGender)) {
+                                            FirebaseFirestore.getInstance()
+                                                    .collection("users")
+                                                    .document(uid)
+                                                    .update("glamMediaUrl", uploadedGlamUrl, "gender", userGender);
+                                        } else {
+                                            FirebaseFirestore.getInstance()
+                                                    .collection("users")
+                                                    .document(uid)
+                                                    .update("glamMediaUrl", uploadedGlamUrl);
+                                        }
                                         Toast.makeText(this, "Face image uploaded to Glam AI successfully!", Toast.LENGTH_SHORT).show();
                                     } else {
                                         isGlamModelReady = false;
@@ -311,6 +308,14 @@ public class AiTryOnActivity extends AppCompatActivity {
                 .setItems(genderOptions, (dialog, which) -> {
                     userGender = genderOptions[which];
 
+                    String uid = FirebaseAuth.getInstance().getUid();
+                    if (uid != null) {
+                        FirebaseFirestore.getInstance().collection("users").document(uid)
+                                .update("gender", userGender)
+                                .addOnSuccessListener(aVoid -> Log.d("GenderUpdate", "User gender updated to " + userGender))
+                                .addOnFailureListener(e -> Log.e("GenderUpdate", "Error updating user gender", e));
+                    }
+
                     showUploadOrCameraDialog();
                 })
                 .setCancelable(true)
@@ -332,9 +337,7 @@ public class AiTryOnActivity extends AppCompatActivity {
                     if (doc.contains("gender")) {
                         userGender = doc.getString("gender");
                     }
-                    if (doc.contains("bodyType")) {
-                        selectedBodyType = doc.getString("bodyType");
-                    }
+
                     if (doc.contains("faceImageUrl")) {
                         userFaceImageUrl = doc.getString("faceImageUrl");
                         if (userFaceImageUrl != null && !userFaceImageUrl.isEmpty()) {
@@ -348,7 +351,6 @@ public class AiTryOnActivity extends AppCompatActivity {
                     if (doc.contains("glamMediaUrl")) {
                         userGlamModelUrl = doc.getString("glamMediaUrl");
                     }
-                    filterOutfitsByBodyType();
                 });
     }
 
@@ -361,26 +363,12 @@ public class AiTryOnActivity extends AppCompatActivity {
 
     private void setupTabs() {
         tabLayout.removeAllTabs();
-        String[] predefinedTypes = {"All"};
-        for (String type : predefinedTypes) {
-            tabLayout.addTab(tabLayout.newTab().setText(type));
-        }
         tabLayout.addTab(tabLayout.newTab().setText("My Uploads"));
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                String tabText = tab.getText() != null ? tab.getText().toString() : "";
-                currentTab = tabText;
-                if ("My Uploads".equals(tabText)) {
-                    outfitAdapter.submitList(new ArrayList<>(userUploadedOutfits));
-                } else if ("All".equals(tabText)) {
-                    selectedBodyType = "All";
-                    fetchOutfits();
-                } else {
-                    selectedBodyType = tabText;
-                    filterOutfitsByBodyType();
-                }
+                outfitAdapter.submitList(new ArrayList<>(userUploadedOutfits));
             }
 
             @Override
@@ -392,7 +380,7 @@ public class AiTryOnActivity extends AppCompatActivity {
             }
         });
 
-        TabLayout.Tab myUploadsTab = tabLayout.getTabAt(1);
+        TabLayout.Tab myUploadsTab = tabLayout.getTabAt(0);
         if (myUploadsTab != null) {
             myUploadsTab.select();
         }
@@ -412,24 +400,15 @@ public class AiTryOnActivity extends AppCompatActivity {
             DocumentReference docRef = db.collection("user_uploaded_outfits").document();
             String docId = docRef.getId();
 
-            Outfit outfit = new Outfit(imageUrl, userGender, selectedBodyType, uid);
+            Outfit outfit = new Outfit(imageUrl, uid);
             outfit.setId(docId);
+            outfit.setUserUploaded(true);
 
             docRef.set(outfit)
                     .addOnSuccessListener(aVoid -> {
                         userUploadedOutfits.add(0, outfit);
-                        allOutfits.add(0, outfit);
-                        db.collection("outfits").document(docId).set(outfit);
-
-                        if ("All".equalsIgnoreCase(selectedBodyType)) {
-                            outfitAdapter.submitList(new ArrayList<>(allOutfits));
-                        }
-
-                        TabLayout.Tab currentTab = tabLayout.getTabAt(tabLayout.getSelectedTabPosition());
-                        if (currentTab != null && "My Uploads".contentEquals(Objects.requireNonNull(currentTab.getText()))) {
-                            outfitAdapter.submitList(new ArrayList<>(userUploadedOutfits));
-                            recyclerOutfit.scrollToPosition(0);
-                        }
+                        outfitAdapter.submitList(new ArrayList<>(userUploadedOutfits));
+                        recyclerOutfit.scrollToPosition(0);
 
                         Toast.makeText(this, "Upload successful", Toast.LENGTH_SHORT).show();
                     })
@@ -474,38 +453,6 @@ public class AiTryOnActivity extends AppCompatActivity {
         }).start();
     }
 
-
-    private void fetchOutfits() {
-        FirebaseFirestore.getInstance().collection("outfits")
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    allOutfits.clear();
-                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                        Outfit outfit = doc.toObject(Outfit.class);
-                        if (outfit != null) {
-                            Log.d("fetchOutfits", "Loaded outfit: " + outfit.getImageUrl());
-
-                            allOutfits.add(outfit);
-                        }
-                    }
-                    filterOutfitsByBodyType();
-                });
-    }
-
-    private void filterOutfitsByBodyType() {
-        if ("All".equalsIgnoreCase(selectedBodyType)) {
-            outfitAdapter.submitList(new ArrayList<>(allOutfits));
-        } else {
-            List<Outfit> filtered = new ArrayList<>();
-            for (Outfit o : allOutfits) {
-                if (selectedBodyType.equalsIgnoreCase(o.getBodyType())) {
-                    filtered.add(o);
-                }
-            }
-            outfitAdapter.submitList(filtered);
-        }
-    }
-
     private void fetchUserUploadedOutfits() {
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid == null) return;
@@ -516,9 +463,14 @@ public class AiTryOnActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     userUploadedOutfits.clear();
+                    List<Outfit> tempFetchedOutfits = new ArrayList<>();
+
                     for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
                         Outfit outfit = doc.toObject(Outfit.class);
                         if (outfit == null) continue;
+
+                        outfit.setId(doc.getId());
+                        outfit.setUserUploaded(true);
 
                         if ((outfit.getImageUrl() == null || outfit.getImageUrl().isEmpty())
                                 && outfit.getStoragePath() != null && !outfit.getStoragePath().isEmpty()) {
@@ -532,49 +484,61 @@ public class AiTryOnActivity extends AppCompatActivity {
                                         outfit.setImageUrl(uri.toString());
 
                                         userUploadedOutfits.add(outfit);
-                                        allOutfits.add(outfit);
 
-                                        if ("My Uploads".equals(currentTab)) {
-                                            outfitAdapter.submitList(new ArrayList<>(userUploadedOutfits));
-                                        }
+                                        outfitAdapter.submitList(new ArrayList<>(userUploadedOutfits));
                                     })
                                     .addOnFailureListener(e -> Log.e("fetchOutfits", "Failed to get downloadUrl", e));
                         } else {
-                            userUploadedOutfits.add(outfit);
-                            allOutfits.add(outfit);
+                            tempFetchedOutfits.add(outfit);
                         }
                     }
+                    userUploadedOutfits.addAll(tempFetchedOutfits);
 
-                    if ("My Uploads".equals(currentTab)) {
-                        outfitAdapter.submitList(new ArrayList<>(userUploadedOutfits));
-                    }
+                    outfitAdapter.submitList(new ArrayList<>(userUploadedOutfits));
+
                 });
     }
 
 
     private void deleteOutfit(Outfit outfit) {
         String docId = outfit.getId();
+        if (docId == null || docId.isEmpty()) {
+            Toast.makeText(this, "Cannot delete: Outfit ID is missing.", Toast.LENGTH_SHORT).show();
+            Log.e("DeleteOutfit", "Attempted to delete outfit with null/empty ID.");
+            return;
+        }
 
         FirebaseFirestore.getInstance()
                 .collection("user_uploaded_outfits")
                 .document(docId)
                 .delete()
                 .addOnSuccessListener(aVoid -> {
-                    StorageReference photoRef = FirebaseStorage.getInstance().getReference(outfit.getStoragePath());
-                    photoRef.delete()
-                            .addOnSuccessListener(aVoid2 -> {
-                                userUploadedOutfits.remove(outfit);
-                                allOutfits.remove(outfit);
-                                outfitAdapter.submitList(new ArrayList<>(userUploadedOutfits));
-                                Toast.makeText(this, "Outfit deleted", Toast.LENGTH_SHORT).show();
-                            })
-                            .addOnFailureListener(e ->
-                                    Toast.makeText(this, "Failed to delete image: " + e.getMessage(), Toast.LENGTH_SHORT).show()
-                            );
+
+                    if (outfit.getStoragePath() != null && !outfit.getStoragePath().isEmpty()) {
+                        StorageReference photoRef = FirebaseStorage.getInstance().getReference(outfit.getStoragePath());
+                        photoRef.delete()
+                                .addOnSuccessListener(aVoid2 -> {
+                                    userUploadedOutfits.remove(outfit);
+                                    outfitAdapter.submitList(new ArrayList<>(userUploadedOutfits));
+                                    Toast.makeText(this, "Outfit deleted (and image from Storage).", Toast.LENGTH_SHORT).show();
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(this, "Deleted from Firestore, but failed to delete image from Storage: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                    Log.e("DeleteOutfit", "Failed to delete image from Storage: " + e.getMessage());
+                                    userUploadedOutfits.remove(outfit);
+                                    outfitAdapter.submitList(new ArrayList<>(userUploadedOutfits));
+                                });
+                    } else {
+                        userUploadedOutfits.remove(outfit);
+                        outfitAdapter.submitList(new ArrayList<>(userUploadedOutfits));
+                        Toast.makeText(this, "Outfit deleted.", Toast.LENGTH_SHORT).show();
+                        Log.d("DeleteOutfit", "Outfit deleted from Firestore. No Firebase Storage path to delete.");
+                    }
                 })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "Failed to delete Firestore doc: " + e.getMessage(), Toast.LENGTH_SHORT).show()
-                );
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to delete outfit from Firestore: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Log.e("DeleteOutfit", "Failed to delete Firestore doc: " + e.getMessage());
+                });
     }
 
     // upload face image to glam ai server, callback with uploaded image url or null if fail

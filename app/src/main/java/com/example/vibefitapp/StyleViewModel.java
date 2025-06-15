@@ -1,6 +1,7 @@
 package com.example.vibefitapp;
 
 import androidx.lifecycle.ViewModel;
+
 import android.util.Log;
 
 import com.google.firebase.ai.java.ChatFutures;
@@ -15,7 +16,7 @@ public class StyleViewModel extends ViewModel {
     private static final String TAG = "StyleViewModel";
 
     private final GenerativeModelFutures generativeModel;
-    private ChatFutures chat;
+    private final ChatFutures chat;
     private final List<ChatMessage> messageList = new ArrayList<>();
 
     public StyleViewModel() {
@@ -24,7 +25,6 @@ public class StyleViewModel extends ViewModel {
 
         List<Content> initialHistoryForNewChat = new ArrayList<>();
         chat = generativeModel.startChat(initialHistoryForNewChat);
-
         messageList.clear();
     }
 
@@ -42,3 +42,4 @@ public class StyleViewModel extends ViewModel {
         Log.d(TAG, "StyleViewModel cleared");
     }
 }
+

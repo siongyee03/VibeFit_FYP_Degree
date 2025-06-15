@@ -20,6 +20,7 @@
     <string name="login_now">Login Now</string>
     <string name="addPhoto">Add photo</string>
     <string name="select_gender">Select Gender</string>
+    <string name="admin_register">Admin Register</string>
 
     <!--Home-->
     <string name="search_text">Spring 2025 trends</string>
@@ -28,7 +29,7 @@
     <string name="forum">Forum</string>
     <string name="trends">Trends</string>
     <string name="searchFunction">Search bar</string>
-    <string name="notification">Notification</string>
+    <string name="notification">Notifications</string>
 
     <!--Footer-->
     <string name="home">Home</string>
@@ -68,6 +69,13 @@
     <string name="media_page_indicator">%1$d/%2$d</string>
     <string name="posted_on">Posted on %1$s</string>
     <string name="actions">actions</string>
+    <string name="author">Author</string>
+    <string name="reply">Reply</string>
+    <string name="comments">Comments</string>
+    <string name="add_a_comment">Add a comment...</string>
+    <string name="send_comment">send comment</string>
+    <string name="comment_count">0</string>
+    <string name="replying_to">Replying to @%1$s:</string>
 
     <!--Closet-->
     <string name="height">Height</string>
@@ -153,9 +161,10 @@
     <string name="settings">Settings</string>
     <string name="logout">Log Out</string>
     <string name="favourites">Favourites</string>
+    <string name="posts">Posts</string>
     <string name="go">Go</string>
     <string name="user_avatar">User Avatar</string>
-    <string name="anonymous">anonymous</string>
+    <string name="anonymous">Anonymous</string>
     <string name="login_register">Login / Register</string>
     <string name="please_log_in_first">Please log in first.</string>
     <string name="failed_to_load_user_data">Failed to load user data.</string>
@@ -191,4 +200,12 @@
     <string name="admin_id">Admin ID</string>
     <string name="password_requirements">• Minimum 8 characters\n• At least 1 uppercase letter\n• At least 1 lowercase letter\n• At least 1 number</string>
     <string name="processing_try_on">Almost ready! Trying on your outfit...</string>
+    <string name="my_posts">My Posts</string>
+
+    <!-- notification -->
+    <string name="you_have_no_notifications_yet">You have no notifications yet.</string>
+    <string name="user_comment">User commented on your post: \'Great post!\'</string>
+    <string name="timestamp">2024-06-14 10:30 AM</string>
+    <string name="unknown_time">Unknown time</string>
+
 </resources>

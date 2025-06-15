@@ -1,10 +1,14 @@
 package com.example.vibefitapp;
 
+import static com.example.vibefitapp.LoginActivity.fromHtmlCompat;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -43,7 +47,7 @@ public class RegisterActivity extends AppCompatActivity {
     private static final String TAG = "RegisterActivity";
     private static final int DEFAULT_AVATAR_RESOURCE = R.drawable.ic_avatar_placeholder;
     private EditText regisEmail, regis_pass, regis_confirm_pass;
-    private ImageView ivAvatar;
+    private ImageView ivAvatar, togglePassword, toggleConfirmPassword;
     private Uri selectedImageUri;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -71,10 +75,13 @@ public class RegisterActivity extends AppCompatActivity {
         regisEmail = findViewById(R.id.regisEmail);
         regis_pass = findViewById(R.id.regis_pass);
         regis_confirm_pass = findViewById(R.id.regis_confirm_pass);
+        togglePassword = findViewById(R.id.iv_toggle_password);
+        toggleConfirmPassword = findViewById(R.id.iv_toggle_confirm_password);
         Button btnRegister = findViewById(R.id.btn_register);
         ImageButton btnBack = findViewById(R.id.btn_back);
         ivAvatar = findViewById(R.id.avatar);
         TextView loginNow = findViewById(R.id.login_now);
+        loginNow.setText(fromHtmlCompat("<u>Login Now</u>"));
 
         // Back Button Click Listener
         btnBack.setOnClickListener(v -> {
@@ -125,6 +132,22 @@ public class RegisterActivity extends AppCompatActivity {
 
         ivAvatar.setOnClickListener(v -> openImagePicker());
 
+        regis_pass.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                togglePassword.setVisibility(View.VISIBLE);
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+
+        regis_confirm_pass.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                toggleConfirmPassword.setVisibility(View.VISIBLE);
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+
         //Register button listener
         btnRegister.setOnClickListener(v -> {
             String username = regisUsername.getText().toString().trim();
@@ -155,22 +178,24 @@ public class RegisterActivity extends AppCompatActivity {
             if (password.isEmpty()) {
                 regis_pass.setError("Password is required");
                 regis_pass.requestFocus();
+                togglePassword.setVisibility(View.GONE);
                 return;
             }
 
             if (!isPasswordValid(password)) {
-                regis_pass.setError("Password must be at least 8 characters and include uppercase, lowercase, number, and special character");
+                regis_pass.setError("Password must be at least 8 characters and include uppercase, lowercase, and number");
                 regis_pass.requestFocus();
+                togglePassword.setVisibility(View.GONE);
                 return;
             }
 
             if (!password.equals(confirmPassword)) {
                 regis_confirm_pass.setError("Passwords do not match");
                 regis_confirm_pass.requestFocus();
+                toggleConfirmPassword.setVisibility(View.GONE);
                 return;
             }
 
-            // If all validations pass, proceed with Firebase registration
             createAcc(username, email, password, selectedGender);
         });
 
@@ -193,9 +218,6 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void setupPasswordVisibilityToggle() {
-        ImageView togglePassword = findViewById(R.id.iv_toggle_password);
-        ImageView toggleConfirmPassword = findViewById(R.id.iv_toggle_confirm_password);
-
         togglePassword.setTag("hidden");
         toggleConfirmPassword.setTag("hidden");
 
@@ -229,7 +251,9 @@ public class RegisterActivity extends AppCompatActivity {
 
                         if (user == null) {
                             Toast.makeText(RegisterActivity.this, "You're registered! Please log in to continue.", Toast.LENGTH_LONG).show();
-                            startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                            intent.putExtra("fromRegistration", true);
+                            startActivity(intent);
                             finish();
                             return;
                         }
@@ -282,15 +306,13 @@ public class RegisterActivity extends AppCompatActivity {
                 byte[] data = baos.toByteArray();
 
                 UploadTask uploadTask = imageRef.putBytes(data);
-                uploadTask.addOnSuccessListener(taskSnapshot -> {
-                    imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                        String imageUrl = uri.toString();
-                        storeUserInfo(user, username, imageUrl, selectedGender);
-                    }).addOnFailureListener(e -> {
-                        Log.e(TAG, "Failed to get download URL", e);
-                        storeUserInfo(user, username, null, selectedGender);
-                    });
+                uploadTask.addOnSuccessListener(taskSnapshot -> imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    String imageUrl = uri.toString();
+                    storeUserInfo(user, username, imageUrl, selectedGender);
                 }).addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to get download URL", e);
+                    storeUserInfo(user, username, null, selectedGender);
+                })).addOnFailureListener(e -> {
                     Log.e("RegisterActivity", "Image upload failed: " + e.getMessage(), e);
                     Toast.makeText(RegisterActivity.this, "Sorry, we couldn't upload your image. Please try again.", Toast.LENGTH_SHORT).show();
                     storeUserInfo(user, username, null, selectedGender);
@@ -332,11 +354,13 @@ public class RegisterActivity extends AppCompatActivity {
                     // email verification
                     user.sendEmailVerification().addOnCompleteListener(sendTask -> {
                         if (sendTask.isSuccessful()) {
-                            Toast.makeText(RegisterActivity.this, "We've sent a verification email. Please check your inbox or spam folder to activate your account.", Toast.LENGTH_LONG).show();
+                            //Toast.makeText(RegisterActivity.this, "We've sent a verification email. Please check your inbox or spam folder to activate your account.", Toast.LENGTH_LONG).show();
 
                             mAuth.signOut();
 
                             Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                            intent.putExtra("fromRegistration", true);
+                            intent.putExtra("registeredEmail", user.getEmail());
                             startActivity(intent);
                             finish();
                         } else {

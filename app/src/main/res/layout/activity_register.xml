@@ -219,7 +219,10 @@
                     android:text="@string/login_now"
                     android:textColor="@color/purple_main"
                     android:textSize="16sp"
-                    android:fontFamily="@font/roboto_mono_regular" />
+                    android:fontFamily="@font/roboto_mono_regular"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackgroundBorderless"/>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

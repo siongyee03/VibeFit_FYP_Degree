@@ -19,4 +19,7 @@
 
     <!-- input box background -->
     <color name="input_bg">#FBF7F7</color>
+
+    <!-- notification -->
+    <color name="light_blue_50">#E1F5FE</color>
 </resources>
