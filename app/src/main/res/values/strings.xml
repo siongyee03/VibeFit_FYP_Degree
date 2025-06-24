@@ -201,11 +201,17 @@
     <string name="password_requirements">• Minimum 8 characters\n• At least 1 uppercase letter\n• At least 1 lowercase letter\n• At least 1 number</string>
     <string name="processing_try_on">Almost ready! Trying on your outfit...</string>
     <string name="my_posts">My Posts</string>
+    <string name="admin_role">Role: %1$s</string>
+    <string name="admin_role_disabled">Role: %1$s (Disabled)</string>
+
 
     <!-- notification -->
     <string name="you_have_no_notifications_yet">You have no notifications yet.</string>
     <string name="user_comment">User commented on your post: \'Great post!\'</string>
     <string name="timestamp">2024-06-14 10:30 AM</string>
     <string name="unknown_time">Unknown time</string>
+    <string name="disable">Disable</string>
+    <string name="enable_admin">Enable Admin</string>
+    <string name="reset_email"><![CDATA[Change email & resend verification]]></string>
 
 </resources>

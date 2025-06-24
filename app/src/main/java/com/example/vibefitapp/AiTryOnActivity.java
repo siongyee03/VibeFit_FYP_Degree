@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -62,7 +63,7 @@ import com.google.firebase.storage.StorageReference;
 public class AiTryOnActivity extends AppCompatActivity {
 
     private View loadingOverlay;
-
+    private TextView loadingText;
     private ImageView imgUserModel;
     private RecyclerView recyclerOutfit;
     private LinearLayout placeholderContainer;
@@ -94,6 +95,7 @@ public class AiTryOnActivity extends AppCompatActivity {
         placeholderContainer = findViewById(R.id.placeholder_container);
         tabLayout = findViewById(R.id.tab_layout);
         loadingOverlay = findViewById(R.id.loadingOverlay);
+        loadingText = findViewById(R.id.loadingText);
 
         btnUploadOverlay = findViewById(R.id.btn_upload_overlay);
         btnChangeModel = findViewById(R.id.btn_change_model);
@@ -120,7 +122,6 @@ public class AiTryOnActivity extends AppCompatActivity {
 
                 if (!isGlamModelReady || TextUtils.isEmpty(userGlamModelUrl)) {
                     Toast.makeText(AiTryOnActivity.this, "Face image is still processing. Please wait.", Toast.LENGTH_SHORT).show();
-                    return;
                 } else {
                     startTryOnProcess(outfit.getImageUrl());
                 }
@@ -158,7 +159,13 @@ public class AiTryOnActivity extends AppCompatActivity {
                     .edit().putBoolean("hasNewUploads", false).apply();
         }
 
-        btnUploadOverlay.setOnClickListener(v -> showUploadOrCameraDialog());
+        btnUploadOverlay.setOnClickListener(v -> {
+            if (!"Male".equalsIgnoreCase(userGender) && !"Female".equalsIgnoreCase(userGender)) {
+                showGenderSelectDialog();
+            } else {
+                showUploadOrCameraDialog();
+            }
+        });
 
         btnChangeModel.setOnClickListener(v -> {
             if (!"Male".equalsIgnoreCase(userGender) && !"Female".equalsIgnoreCase(userGender)) {
@@ -212,6 +219,7 @@ public class AiTryOnActivity extends AppCompatActivity {
 
     private void showLoading() {
         runOnUiThread(() -> loadingOverlay.setVisibility(View.VISIBLE));
+        loadingText.setVisibility(View.VISIBLE);
     }
 
     private void hideLoading() {
@@ -246,6 +254,10 @@ public class AiTryOnActivity extends AppCompatActivity {
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid == null) return;
 
+        showLoading();
+        loadingText.setVisibility(View.GONE);
+        isGlamModelReady = false;
+
         Glide.with(this).load(faceUri).into(imgUserModel);
         imgUserModel.setVisibility(View.VISIBLE);
         placeholderContainer.setVisibility(View.GONE);
@@ -259,46 +271,87 @@ public class AiTryOnActivity extends AppCompatActivity {
                 .addOnSuccessListener(taskSnapshot ->
                         ref.getDownloadUrl().addOnSuccessListener(downloadUri -> {
                             String firebaseStorageUrl = downloadUri.toString();
+                            Log.d("UpdateModel", "Firebase Storage URL: " + firebaseStorageUrl);
 
-                            // Update faceImageUrl in Firestore
+                            // Update local variable immediately
+                            userFaceImageUrl = firebaseStorageUrl;
+
                             FirebaseFirestore.getInstance()
                                     .collection("users")
                                     .document(uid)
-                                    .update("faceImageUrl", firebaseStorageUrl);
+                                    .update("faceImageUrl", firebaseStorageUrl)
+                                    .addOnSuccessListener(aVoid -> {
+                                        Log.d("UpdateModel", "Firestore faceImageUrl updated.");
 
-                            cacheFaceImageUrl(firebaseStorageUrl); // Cache the Firebase URL
+                                        new Thread(() -> {
+                                            try {
 
-                            try {
-                                File tempFaceFile = FileUtil.downloadImageToTempFile(this, firebaseStorageUrl);
-                                uploadFaceImageToGlamAI(tempFaceFile, uploadedGlamUrl -> {
-                                    if (uploadedGlamUrl != null) {
-                                        userGlamModelUrl = uploadedGlamUrl;
-                                        isGlamModelReady = true;
+                                                File tempFaceFile = FileUtil.downloadImageToTempFile(this, firebaseStorageUrl);
+                                                runOnUiThread(() -> {
+                                                    uploadFaceImageToGlamAI(tempFaceFile, uploadedGlamUrl -> {
+                                                        if (uploadedGlamUrl != null) {
+                                                            userGlamModelUrl = uploadedGlamUrl;
+                                                            isGlamModelReady = true;
 
-                                        if (!"Prefer not to say".equalsIgnoreCase(userGender)) {
-                                            FirebaseFirestore.getInstance()
-                                                    .collection("users")
-                                                    .document(uid)
-                                                    .update("glamMediaUrl", uploadedGlamUrl, "gender", userGender);
-                                        } else {
-                                            FirebaseFirestore.getInstance()
-                                                    .collection("users")
-                                                    .document(uid)
-                                                    .update("glamMediaUrl", uploadedGlamUrl);
-                                        }
-                                        Toast.makeText(this, "Face image uploaded to Glam AI successfully!", Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        isGlamModelReady = false;
-                                        Toast.makeText(this, "Failed to upload face to Glam AI.", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                            } catch (IOException e) {
-                                Log.e("updateUserModelImage", "Error downloading/uploading to Glam AI", e);
-                                Toast.makeText(this, "Error preparing image for Glam AI.", Toast.LENGTH_SHORT).show();
-                            }
+                                                            if (!"Prefer not to say".equalsIgnoreCase(userGender)) {
+                                                                FirebaseFirestore.getInstance()
+                                                                        .collection("users")
+                                                                        .document(uid)
+                                                                        .update("glamMediaUrl", uploadedGlamUrl, "gender", userGender)
+                                                                        .addOnSuccessListener(v -> {
+                                                                            hideLoading();
+                                                                            Toast.makeText(this, "Face model updated successfully!", Toast.LENGTH_SHORT).show();
+                                                                            Log.d("UpdateModel", "Firestore glamMediaUrl and gender updated.");
+                                                                        })
+                                                                        .addOnFailureListener(e -> {
+                                                                            hideLoading();
+                                                                            Toast.makeText(this, "Face model updated, but failed to save to Firestore.", Toast.LENGTH_SHORT).show();
+                                                                            Log.e("UpdateModel", "Firestore glamMediaUrl update failed: " + e.getMessage());
+                                                                        });
+                                                            } else {
+                                                                FirebaseFirestore.getInstance()
+                                                                        .collection("users")
+                                                                        .document(uid)
+                                                                        .update("glamMediaUrl", uploadedGlamUrl)
+                                                                        .addOnSuccessListener(v -> {
+                                                                            hideLoading();
+                                                                            Toast.makeText(this, "Face model updated successfully!", Toast.LENGTH_SHORT).show();
+                                                                            Log.d("UpdateModel", "Firestore glamMediaUrl updated.");
+                                                                        })
+                                                                        .addOnFailureListener(e -> {
+                                                                            hideLoading();
+                                                                            Toast.makeText(this, "Face model updated, but failed to save to Firestore.", Toast.LENGTH_SHORT).show();
+                                                                            Log.e("UpdateModel", "Firestore glamMediaUrl update failed: " + e.getMessage());
+                                                                        });
+                                                            }
+                                                        } else {
+                                                            isGlamModelReady = false;
+                                                            hideLoading();
+                                                            Toast.makeText(this, "Failed to upload face to Glam AI.", Toast.LENGTH_SHORT).show();
+                                                            Log.e("UpdateModel", "Glam AI upload failed.");
+                                                        }
+                                                    });
+                                                });
+                                            } catch (IOException e) {
+                                                runOnUiThread(() -> {
+                                                    hideLoading();
+                                                    Log.e("updateUserModelImage", "Error downloading image to temp file", e);
+                                                    Toast.makeText(this, "Error preparing image for Glam AI.", Toast.LENGTH_SHORT).show();
+                                                });
+                                            }
+                                        }).start();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        hideLoading();
+                                        Toast.makeText(this, "Failed to update face image URL in Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                        Log.e("UpdateModel", "Firestore faceImageUrl update failed: " + e.getMessage());
+                                    });
                         }))
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "Failed to upload face photo to Firebase: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> {
+                    hideLoading();
+                    Toast.makeText(this, "Failed to upload face photo to Firebase: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e("UpdateModel", "Firebase Storage upload failed: " + e.getMessage());
+                });
     }
 
     private void showGenderSelectDialog() {
@@ -352,13 +405,6 @@ public class AiTryOnActivity extends AppCompatActivity {
                         userGlamModelUrl = doc.getString("glamMediaUrl");
                     }
                 });
-    }
-
-    private void cacheFaceImageUrl(String url) {
-        getSharedPreferences("ai_tryon_cache", MODE_PRIVATE)
-                .edit()
-                .putString("faceImageUrl", url)
-                .apply();
     }
 
     private void setupTabs() {
@@ -415,7 +461,6 @@ public class AiTryOnActivity extends AppCompatActivity {
                     .addOnFailureListener(e -> Toast.makeText(this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
         });
     }
-
 
     private void uploadOutfitToImgBB(Uri imageUri, Callback<String> callback) {
         new Thread(() -> {
@@ -545,9 +590,16 @@ public class AiTryOnActivity extends AppCompatActivity {
     private void uploadFaceImageToGlamAI(File faceFile, Callback<String> callback) {
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid == null || faceFile == null || !faceFile.exists()) {
+            Log.e("GlamAI_Upload", "Invalid input: UID, faceFile or faceFile not exists.");
             runOnUiThread(() -> callback.call(null));
             return;
         }
+
+        // --- NEW LOGGING: Verify the input file ---
+        Log.d("GlamAI_Upload", "Attempting to upload face file: " + faceFile.getAbsolutePath());
+        Log.d("GlamAI_Upload", "File size: " + faceFile.length() + " bytes");
+        Log.d("GlamAI_Upload", "File name: " + faceFile.getName());
+
 
         new Thread(() -> {
             try {
@@ -565,30 +617,41 @@ public class AiTryOnActivity extends AppCompatActivity {
                         .build();
 
                 try (Response response = client.newCall(request).execute()) {
+                    String resp = response.body() != null ? response.body().string() : "";
+                    Log.d("GlamAI_Upload", "Glam AI Upload Response Code: " + response.code());
+                    Log.d("GlamAI_Upload", "Glam AI Upload Response Body: " + resp);
+
                     if (!response.isSuccessful()) {
-                        Log.e("GlamAI", "Upload failed: " + response.code());
+                        Log.e("GlamAI_Upload", "Glam AI Upload failed: HTTP " + response.code() + ", Response: " + resp);
                         runOnUiThread(() -> callback.call(null));
                         return;
                     }
 
-                    String resp = response.body() != null ? response.body().string() : "";
                     JSONObject json = new JSONObject(resp);
                     String uploadedUrl = json.optString("file_url", "");
 
+                    // --- NEW LOGGING: Verify the received URL ---
                     if (!TextUtils.isEmpty(uploadedUrl)) {
+                        Log.d("GlamAI_Upload", "Glam AI Upload Successful. Received URL: " + uploadedUrl);
+
+                        // Firestore update and local variable update remain here
                         FirebaseFirestore.getInstance()
                                 .collection("users")
                                 .document(uid)
-                                .update("glamMediaUrl", uploadedUrl);
-                        userGlamMediaUrl = uploadedUrl;
+                                .update("glamMediaUrl", uploadedUrl)
+                                .addOnSuccessListener(aVoid -> Log.d("GlamAI_Upload", "Firestore glamMediaUrl updated successfully."))
+                                .addOnFailureListener(e -> Log.e("GlamAI_Upload", "Failed to update Firestore glamMediaUrl: " + e.getMessage()));
+
+                        userGlamMediaUrl = uploadedUrl; // Update local variable for immediate use
+
                         runOnUiThread(() -> callback.call(uploadedUrl));
                     } else {
-                        Log.e("GlamAI", "file_url is empty");
+                        Log.e("GlamAI_Upload", "Glam AI Upload successful, but 'file_url' is empty in response. Response: " + resp);
                         runOnUiThread(() -> callback.call(null));
                     }
                 }
             } catch (Exception e) {
-                Log.e("GlamAI", "Exception during upload", e);
+                Log.e("GlamAI_Upload", "Exception during Glam AI upload process", e);
                 runOnUiThread(() -> callback.call(null));
             }
         }).start();

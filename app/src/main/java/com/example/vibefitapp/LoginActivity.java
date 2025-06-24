@@ -20,12 +20,16 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 //login authentication
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.auth.FirebaseAuth;
 
 import android.widget.Toast;
+
+import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
     private EditText loginEmail, loginPass;
@@ -39,7 +43,6 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Initialize views
         ImageButton backButton = findViewById(R.id.backButton);
         loginEmail = findViewById(R.id.loginEmail);
         loginPass = findViewById(R.id.loginPass);
@@ -88,7 +91,6 @@ public class LoginActivity extends AppCompatActivity {
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        // Login Button Click Listener
         loginButton.setOnClickListener(v -> {
             String email = loginEmail.getText().toString();
             String password = loginPass.getText().toString();
@@ -148,6 +150,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
 
+
         Intent intent = getIntent();
         boolean fromRegistration = intent.getBooleanExtra("fromRegistration", false);
         if (fromRegistration) {
@@ -161,6 +164,7 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             Log.d("LoginActivity","fromRegistration is false");
         }
+
     }
 
     @Override
@@ -176,6 +180,14 @@ public class LoginActivity extends AppCompatActivity {
                                 .get()
                                 .addOnSuccessListener(doc -> {
                                     if (doc.exists()) {
+
+                                        Boolean isDisabled = doc.getBoolean("disabled");
+                                        if (Boolean.TRUE.equals(isDisabled)) {
+                                            Toast.makeText(this, "This account has been disabled.", Toast.LENGTH_LONG).show();
+                                            mAuth.signOut();
+                                            return;
+                                        }
+
                                         String role = doc.getString("role");
                                         if ("admin".equals(role) || "superadmin".equals(role)) {
                                             Toast.makeText(this, "Welcome back, Admin!", Toast.LENGTH_SHORT).show();
@@ -220,6 +232,14 @@ public class LoginActivity extends AppCompatActivity {
                                         .get()
                                         .addOnSuccessListener(documentSnapshot -> {
                                             if (documentSnapshot.exists()) {
+
+                                                Boolean isDisabled = documentSnapshot.getBoolean("disabled");
+                                                if (Boolean.TRUE.equals(isDisabled)) {
+                                                    Toast.makeText(this, "This account has been disabled.", Toast.LENGTH_LONG).show();
+                                                    mAuth.signOut();
+                                                    return;
+                                                }
+
                                                 String role = documentSnapshot.getString("role");
                                                 if (role != null) {
                                                     Intent intent;

@@ -32,7 +32,6 @@ public class UploadPostActivity extends AppCompatActivity {
     private static final int MAX_IMAGE_COUNT = 9;
     private final List<Uri> imageUris = new ArrayList<>();
     private RecyclerView imageRecycler;
-    private VideoView previewVideo;
     private EditText titleInput, descriptionInput;
     private Spinner categorySpinner;
     private ProgressBar uploadProgress;
@@ -54,7 +53,6 @@ public class UploadPostActivity extends AppCompatActivity {
         setContentView(R.layout.activity_upload_post);
 
         imageRecycler = findViewById(R.id.image_recycler);
-        previewVideo = findViewById(R.id.previewVideo);
         titleInput = findViewById(R.id.title_input);
         descriptionInput = findViewById(R.id.description_input);
         categorySpinner = findViewById(R.id.category_spinner);
@@ -414,7 +412,6 @@ public class UploadPostActivity extends AppCompatActivity {
 
     private void updateMediaPreview() {
         if (!imageUris.isEmpty()) {
-            previewVideo.setVisibility(View.GONE);
             imageRecycler.setVisibility(View.VISIBLE);
 
             if (imageRecycler.getAdapter() == null) {

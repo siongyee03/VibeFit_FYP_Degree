@@ -57,16 +57,6 @@
                 tools:listitem="@layout/item_image_preview"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-            <!-- Video Preview -->
-            <VideoView
-                android:id="@+id/previewVideo"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_marginTop="12dp"
-                android:visibility="gone"
-                android:background="@drawable/image_placeholder"
-                android:contentDescription="@string/preview_video" />
-
             <!-- Title Input -->
             <EditText
                 android:id="@+id/title_input"
@@ -79,10 +69,8 @@
                 android:inputType="text"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
-                android:textColor="@color/black_text"
                 android:textColorHint="#888888"
-                android:textSize="20sp"
-                android:fontFamily="@font/roboto_regular" />
+                style="@style/FontRobotoRegular" />
 
             <!-- Description Input -->
             <EditText

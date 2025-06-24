@@ -386,33 +386,44 @@ public class StyleFragment extends Fragment {
                         } else {
                             addMessage(new ChatMessage("AI", "Sorry, I didn’t quite get that. Could you try rephrasing?", false));
                         }
+                    } else {
+
+                        if (!currentMessageList.isEmpty() && !currentMessageList.get(currentMessageList.size() - 1).isUser()) {
+                            currentMessageList.get(currentMessageList.size() - 1).setText(aiResponseBuilder.toString().trim());
+                            chatAdapter.notifyItemChanged(currentMessageList.size() - 1);
+                        } else {
+                            addMessage(new ChatMessage("AI", aiResponseBuilder.toString().trim(), false));
+                        }
                     }
 
+
                     String finalAiResponse = aiResponseBuilder.toString().trim();
+                    Log.d(TAG, "onComplete: Final AI Response String for extraction: '" + finalAiResponse + "'");
 
-                    if (finalAiResponse.toLowerCase().contains("would you like") &&
-                            (finalAiResponse.toLowerCase().contains("image") ||
-                                    finalAiResponse.toLowerCase().contains("example") ||
-                                    finalAiResponse.toLowerCase().contains("picture") ||
-                                    finalAiResponse.toLowerCase().contains("visual"))) {
-                        finalAiResponse += "\n\nJust let me know if you'd like to see related pictures! 😊";
+                    lastRecommendationQuery = extractPotentialImageQueryFromAIResponse(finalAiResponse);
+                    Log.d(TAG, "onComplete: lastRecommendationQuery set to: '" + lastRecommendationQuery + "'");
+
+                    if (lastRecommendationQuery != null && !lastRecommendationQuery.isEmpty()) {
+
                         awaitingImageConfirmation = true;
-
-                        lastRecommendationQuery = extractPotentialImageQueryFromAIResponse(finalAiResponse);
-                        if (lastRecommendationQuery == null || lastRecommendationQuery.isEmpty()) {
-
-                            lastRecommendationQuery = userInputEditText.getText().toString();
-                            Log.w(TAG, "Failed to extract a specific image query from AI response. Awaiting confirmation for general query.");
-                        }
-                        Log.d(TAG, "AI asked for image confirmation. Awaiting 'yes'. Stored query: " + lastRecommendationQuery);
-
+                        Log.d(TAG, "AI's response contained an image query. App is now awaiting user confirmation for: " + lastRecommendationQuery);
                     } else {
+
+                        if (finalAiResponse.toLowerCase().contains("would you like") &&
+                                (finalAiResponse.toLowerCase().contains("image") ||
+                                        finalAiResponse.toLowerCase().contains("example") ||
+                                        finalAiResponse.toLowerCase().contains("picture") ||
+                                        finalAiResponse.toLowerCase().contains("visual"))) {
+
+                            addMessage(new ChatMessage("AI", "I can help with image suggestions, but I'm not sure what specific images to look for at the moment. Could you be more specific about what you'd like to see?", false));
+                        }
                         awaitingImageConfirmation = false;
                         lastRecommendationQuery = null;
                     }
 
                     isAwaitingResponse = false;
                     setControlsEnabled(true);
+                    chatRecyclerView.scrollToPosition(currentMessageList.size() - 1);
                 });
                 currentSubscription = null;
             }
@@ -420,6 +431,8 @@ public class StyleFragment extends Fragment {
     }
 
     private void handlePromptForRecommendation(String userInputText) {
+        Log.d(TAG, "handlePromptForRecommendation called. current lastRecommendationQuery: '" + lastRecommendationQuery + "'");
+
         if (userInputText.toLowerCase().matches(".*(yes|ok|good|want|sure|show|image|photo|picture|look|see|ya|好啊|行|可以|要|看看|发吧|图片|照片).*")) {
             awaitingImageConfirmation = false;
 
@@ -445,23 +458,32 @@ public class StyleFragment extends Fragment {
         if (aiResponse == null) return null;
 
         try {
-            Pattern queryPattern = Pattern.compile("\\[query:([^]]+)]");
+            // First, try to extract from a specific [query:...] tag
+            Pattern queryPattern = Pattern.compile("`query:([^`]+)`");
             Matcher matcher = queryPattern.matcher(aiResponse);
             if (matcher.find()) {
                 String group = matcher.group(1);
-                return group != null ? group.trim() : null;
-            }
-
-            Pattern smartPattern = Pattern.compile(
-                    "\\b(?:a|an|some|this|that|your)?\\s*((?:[\\w\\-]+\\s+){0,3}?(outfit|look|style|dress|combo|set|fit|clothing))\\b",
-                    Pattern.CASE_INSENSITIVE);
-            Matcher smartMatcher = smartPattern.matcher(aiResponse);
-            while (smartMatcher.find()) {
-                String phrase = Objects.requireNonNull(smartMatcher.group(1)).trim();
-                if (phrase.length() >= 3) {
-                    return phrase;
+                String extractedQuery = group != null ? group.trim() : "";
+                if (!extractedQuery.isEmpty()) {
+                    Log.d(TAG, "Extracted query from `query:tag`: " + extractedQuery);
+                    return extractedQuery;
                 }
             }
+
+            // If a [query:...] tag wasn't found or was empty, then try strict fashion patterns
+            Pattern strictFashionPattern = Pattern.compile(
+                    "\\b(?:a|an|some|this|that|your)?\\s*" +
+                            "((?:(?:casual|formal|trendy|elegant|bohemian|street|minimalist|vintage|athleisure|classic|sporty)\\s+){0,2}?" + // Adjectives
+                            "(outfit|look|style|combo|set|fit|clothing|attire|" + // General fashion terms
+                            "blazer|jacket|coat|skirt|pants|jeans|shorts|t-shirt|shirt|sweater|hoodie|dress|gown|suit|shoes|sneakers|boots|" + // Specific items
+                            "denim|leather|linen|silk|cotton)\\b)",
+                    Pattern.CASE_INSENSITIVE);
+            String bestMatch = getString(aiResponse, strictFashionPattern);
+            if (bestMatch != null) {
+                Log.d(TAG, "Extracted query from strict fashion pattern: " + bestMatch);
+                return bestMatch;
+            }
+
 
             String lowerResponse = aiResponse.toLowerCase();
             List<String> triggers = Arrays.asList(
@@ -476,12 +498,12 @@ public class StyleFragment extends Fragment {
                             lowerResponse.lastIndexOf('.', idx),
                             Math.max(lowerResponse.lastIndexOf('!', idx), lowerResponse.lastIndexOf('?', idx))
                     );
-                    if (sentenceEnd >= 0 && sentenceEnd + 1 < idx) {
-                        String context = aiResponse.substring(sentenceEnd + 1, idx);
-                        String cleaned = cleanQueryString(context);
-                        if (cleaned.length() >= 3) {
-                            return cleaned;
-                        }
+                    String context = getString(aiResponse, trigger, sentenceEnd);
+
+                    String cleaned = cleanQueryString(context);
+                    if (cleaned.length() >= 5 && cleaned.matches(".*\\b(outfit|look|style|dress|clothing|blazer|jacket|skirt|pants|jeans|shirt|sweater)\\b.*")) {
+                        Log.d(TAG, "Extracted query from general trigger context: " + cleaned);
+                        return cleaned;
                     }
                 }
             }
@@ -489,7 +511,43 @@ public class StyleFragment extends Fragment {
         } catch (Exception e) {
             Log.e(TAG, "Error during query extraction heuristic", e);
         }
+        Log.d(TAG, "No suitable query extracted from AI response.");
         return null;
+    }
+
+    @NonNull
+    private static String getString(String aiResponse, String trigger, int sentenceEnd) {
+        String context = "";
+        if (sentenceEnd >= 0 && sentenceEnd + 1 < aiResponse.length()) {
+            context = aiResponse.substring(sentenceEnd + 1).trim();
+            int triggerInContextIdx = context.toLowerCase().indexOf(trigger);
+            if (triggerInContextIdx != -1) {
+                context = context.substring(0, triggerInContextIdx).trim();
+            }
+        } else if (sentenceEnd == -1) {
+            context = aiResponse.trim();
+            int triggerInContextIdx = context.toLowerCase().indexOf(trigger);
+            if (triggerInContextIdx != -1) {
+                context = context.substring(0, triggerInContextIdx).trim();
+            }
+        }
+        return context;
+    }
+
+    @Nullable
+    private static String getString(String aiResponse, Pattern strictFashionPattern) {
+        Matcher strictMatcher = strictFashionPattern.matcher(aiResponse);
+
+        String bestMatch = null;
+        while (strictMatcher.find()) {
+            String phrase = Objects.requireNonNull(strictMatcher.group(1)).trim();
+            if (phrase.length() >= 5) { // Require a minimum length for the phrase
+                if (bestMatch == null || phrase.length() > bestMatch.length()) {
+                    bestMatch = phrase;
+                }
+            }
+        }
+        return bestMatch;
     }
 
 
@@ -507,12 +565,18 @@ public class StyleFragment extends Fragment {
                 .replaceAll("(?i)to help you visualize them better", "")
                 .replaceAll("(?i)for more details", "")
                 .replaceAll("(?i)these outfits or styling tips", "")
+                .replaceAll("(?i)ll want to look", "")
+                .replaceAll("(?i)you might like", "")
+                .replaceAll("(?i)is what you are looking for", "")
+                .replaceAll("(?i)I could show you", "")
                 .replaceAll("[.,!?:]", "")
                 .replaceAll("\\s+", " ")
                 .trim();
     }
 
     private void fetchOutfitImagesFromWeb(String query) {
+        Log.d(TAG, "About to fetch images using query: '" + lastRecommendationQuery + "'");
+
         // Ensure the query is not null or empty
         if (query == null || query.trim().isEmpty()) {
             Log.w(TAG, "Attempted to fetch images with empty query.");
@@ -524,6 +588,12 @@ public class StyleFragment extends Fragment {
             });
             return;
         }
+
+        requireActivity().runOnUiThread(() -> {
+            addMessage(new ChatMessage("AI", "Fetching images for '" + query + "'...", false));
+            chatAdapter.notifyItemInserted(viewModel.getMessageList().size() - 1);
+            chatRecyclerView.scrollToPosition(viewModel.getMessageList().size() - 1);
+        });
 
         executor.execute(() -> {
             String apiKey = BuildConfig.UNSPLASH_API_KEY;
@@ -567,6 +637,8 @@ public class StyleFragment extends Fragment {
                         return;
                     }
 
+                    boolean firstImageAdded = false;
+
                     for (int i = 0; i < photos.length(); i++) {
                         JSONObject photo = photos.getJSONObject(i);
 
@@ -577,12 +649,22 @@ public class StyleFragment extends Fragment {
                         }
 
                         if (imageUrl != null && !imageUrl.isEmpty()) {
-                            String finalImageUrl = imageUrl; // for lambda
+                            String finalImageUrl = imageUrl;
+                            boolean finalFirstImageAdded = firstImageAdded;
                             requireActivity().runOnUiThread(() -> {
-                                addMessage(new ChatMessage("AI", "Image for: " + query, false, finalImageUrl));
+                                if (!finalFirstImageAdded) {
+                                    List<ChatMessage> currentMessages = viewModel.getMessageList();
+                                    if (!currentMessages.isEmpty() && currentMessages.get(currentMessages.size() - 1).getText().contains("Fetching images")) {
+                                        currentMessages.remove(currentMessages.size() - 1);
+                                        chatAdapter.notifyItemRemoved(currentMessages.size());
+                                    }
+                                }
+
+                                addMessage(new ChatMessage("AI", "", false, finalImageUrl));
                                 chatAdapter.notifyItemInserted(viewModel.getMessageList().size() - 1);
                                 chatRecyclerView.scrollToPosition(viewModel.getMessageList().size() - 1);
                             });
+                            firstImageAdded = true;
                         } else {
                             Log.w(TAG, "No valid image URL found for photo index " + i);
                         }

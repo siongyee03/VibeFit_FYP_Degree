@@ -75,7 +75,11 @@ public class EditSizeProfile extends AppCompatActivity {
                 .addOnSuccessListener(document -> {
                     if (document.exists()) {
                         String gender = document.getString("gender");
-                        if (!"female".equalsIgnoreCase(gender)) {
+                        if ("female".equalsIgnoreCase(gender)) {
+                            spinnerBraBandSize.setVisibility(View.VISIBLE);
+                            spinnerBraCup.setVisibility(View.VISIBLE);
+                            findViewById(R.id.braCupSize).setVisibility(View.VISIBLE);
+                        } else {
                             spinnerBraBandSize.setVisibility(View.GONE);
                             spinnerBraCup.setVisibility(View.GONE);
                             findViewById(R.id.braCupSize).setVisibility(View.GONE);

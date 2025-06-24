@@ -13,6 +13,7 @@ import com.google.firebase.ai.type.GenerativeBackend;
 import com.google.firebase.ai.type.RequestOptions;
 import com.google.firebase.appcheck.FirebaseAppCheck;
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory;
+import com.google.firebase.functions.FirebaseFunctions;
 
 public class MyApplication extends Application {
     private static final String TAG = "MyApplication";
@@ -45,18 +46,20 @@ public class MyApplication extends Application {
                 .addOnSuccessListener(tokenResponse -> Log.d(TAG, "App Check token is valid now. Ready to call AI."))
                 .addOnFailureListener(exception -> Log.e(TAG, "Failed to get App Check token.", exception));
 
-
+/*
         com.google.firebase.auth.FirebaseAuth.getInstance().useEmulator("10.0.2.2", 9099);
         com.google.firebase.firestore.FirebaseFirestore.getInstance().useEmulator("10.0.2.2", 8080);
         com.google.firebase.storage.FirebaseStorage.getInstance().useEmulator("10.0.2.2", 9199);
 
+ */
 
         String systemInstructionText = "You are a helpful and concise fashion assistant. " +
                 "Only respond to questions related to fashion, clothing, personal style, or outfit advice. " +
                 "If a question is unrelated, politely say: 'I'm here to help with fashion and style questions!' " +
                 "Provide outfit ideas, styling tips, and accessory suggestions based on the user's input, photos. " +
                 "Keep your responses professional and personalized. " +
-                "If a visual example would be helpful, ask at the end if the user would like to see one. [query_options: query1; query2; query3] " +
+                "If a visual example would be helpful, ask at the end if the user would like to see one, " +
+                "include the exact search query you'd use in square brackets, prefixed with `query:`"+
                 "Be warm, polite, and supportive. ";
 
         Content systemInstructionContent = new Content.Builder()

@@ -67,6 +67,8 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation ("com.google.firebase:firebase-firestore")
     implementation ("com.google.firebase:firebase-storage")
+    implementation ("com.google.firebase:firebase-functions")
+
     // Add the dependency for the Vertex AI in Firebase library
     implementation("com.google.firebase:firebase-ai")
     // Required for one-shot operations (to use `ListenableFuture` from Guava Android)
