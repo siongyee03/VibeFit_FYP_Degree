@@ -7,7 +7,8 @@
     android:layout_height="match_parent"
     android:padding="16dp"
     android:background="@color/white"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    android:fillViewport="true">
 
     <LinearLayout
         android:orientation="vertical"
@@ -57,18 +58,14 @@
 
                     <TextView
                         android:id="@+id/genderText"
-                        android:text="@string/me"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginEnd="8dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/roboto_regular" />
-
-                    <View
-                        android:layout_weight="1"
                         android:layout_width="0dp"
-                        android:layout_height="1dp" />
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/me"
+                        android:textStyle="bold"
+                        style="@style/FontRobotoRegular"
+                        android:maxLines="1"
+                        android:ellipsize="end"/>
 
                     <LinearLayout
                         android:id="@+id/editContainer"
@@ -254,12 +251,11 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/upper_body_size"
-                    android:textStyle="bold"
-                    android:fontFamily="@font/roboto_regular"
-                    android:textSize="16sp"
+                    android:layout_marginTop="16dp"
+                    style="@style/FontRobotoRegular"
                     android:gravity="center"
-                    android:layout_marginTop="16dp"/>
+                    android:text="@string/upper_body_size"
+                    android:textStyle="bold" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -356,8 +352,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/lower_body_size"
                     android:textStyle="bold"
-                    android:fontFamily="@font/roboto_regular"
-                    android:textSize="16sp"
+                    style="@style/FontRobotoRegular"
                     android:gravity="center"
                     android:layout_marginTop="16dp"/>
 
@@ -425,10 +420,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:fontFamily="@font/roboto_regular"
+                    style="@style/FontRobotoRegular"
                     android:gravity="center"
                     android:text="@string/body_type"
-                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <LinearLayout
@@ -497,8 +491,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/foot_size"
                     android:textStyle="bold"
-                    android:fontFamily="@font/roboto_regular"
-                    android:textSize="16sp"
+                    style="@style/FontRobotoRegular"
                     android:gravity="center"
                     android:layout_marginTop="16dp"/>
 

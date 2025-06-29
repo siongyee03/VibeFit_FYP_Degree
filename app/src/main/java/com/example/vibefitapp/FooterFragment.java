@@ -61,7 +61,7 @@ public class FooterFragment extends Fragment {
         intent.setType("*/*");
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        String[] mimeTypes = {"image/*", "video/*"};
+        String[] mimeTypes = {"image/*"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
         mediaPickerLauncher.launch(intent);
     }
@@ -79,7 +79,6 @@ public class FooterFragment extends Fragment {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     Intent data = result.getData();
                     ArrayList<String> imageUris = new ArrayList<>();
-                    Uri videoUri = null;
 
                     Bundle extras = data.getExtras();
                     if (extras != null) {
@@ -93,40 +92,30 @@ public class FooterFragment extends Fragment {
                             Toast.makeText(getContext(), "Failed to capture image.", Toast.LENGTH_SHORT).show();
                             return;
                         }
-                }
-                    else if (data.getClipData() != null) {
+                    } else if (data.getClipData() != null) {
                         int count = data.getClipData().getItemCount();
                         for (int i = 0; i < count; i++) {
                             Uri uri = data.getClipData().getItemAt(i).getUri();
                             String type = requireContext().getContentResolver().getType(uri);
-                            if (type != null && type.startsWith("video")) {
-                                videoUri = uri;
-                                break;
-                            } else if (type != null && type.startsWith("image")) {
+                            if (type != null && type.startsWith("image")) {
                                 imageUris.add(uri.toString());
                             }
                         }
                     } else if (data.getData() != null) {
                         Uri uri = data.getData();
                         String type = requireContext().getContentResolver().getType(uri);
-                        if (type != null && type.startsWith("video")) {
-                            videoUri = uri;
-                        } else if (type != null && type.startsWith("image")) {
+                        if (type != null && type.startsWith("image")) {
                             imageUris.add(uri.toString());
                         }
                     }
 
-                    if (videoUri != null && !imageUris.isEmpty()) {
-                        Toast.makeText(getContext(), "You cannot upload images and video together.", Toast.LENGTH_SHORT).show();
+                    if (imageUris.isEmpty()) {
+                        Toast.makeText(getContext(), "Please select image(s).", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
                     Intent intent = new Intent(getActivity(), UploadPostActivity.class);
-                    if (videoUri != null) {
-                        intent.putExtra("video_uri", videoUri.toString());
-                    } else if (!imageUris.isEmpty()) {
-                        intent.putStringArrayListExtra("image_uris", imageUris);
-                    }
+                    intent.putStringArrayListExtra("image_uris", imageUris);
 
                     if (getActivity() instanceof HomeActivity) {
                         String currentTab = ((HomeActivity) getActivity()).getCurrentHeaderTab();
@@ -185,7 +174,15 @@ public class FooterFragment extends Fragment {
                 HomeActivity homeActivity = (HomeActivity) getActivity();
                 String currentTab = homeActivity.getCurrentHeaderTab();
                 recommendedCategory = getRecommendedCategoryByTab(currentTab);
-                showMediaChoiceDialog();
+
+                if ("forum".equalsIgnoreCase(currentTab)) {
+                    Intent intent = new Intent(getActivity(), UploadPostActivity.class);
+                    intent.putExtra("source_tab", currentTab);
+                    intent.putExtra("recommended_category", recommendedCategory);
+                    startActivity(intent);
+                } else {
+                    showMediaChoiceDialog();
+                }
             }
         });
 

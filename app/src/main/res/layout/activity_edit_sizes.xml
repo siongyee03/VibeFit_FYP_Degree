@@ -39,7 +39,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/edit_detailed_sizes"
-                android:textSize="22sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 style="@style/FontRobotoMonoRegular"
                 android:layout_gravity="center_horizontal" />

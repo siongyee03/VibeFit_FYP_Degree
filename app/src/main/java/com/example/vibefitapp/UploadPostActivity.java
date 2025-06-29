@@ -33,6 +33,9 @@ public class UploadPostActivity extends AppCompatActivity {
     private final List<Uri> imageUris = new ArrayList<>();
     private RecyclerView imageRecycler;
     private EditText titleInput, descriptionInput;
+    private LinearLayout forumFieldsLayout;
+    private EditText forumTopicInput, forumStepsInput;
+    private Spinner forumDifficultySpinner;
     private Spinner categorySpinner;
     private ProgressBar uploadProgress;
     private Button postButton;
@@ -59,6 +62,11 @@ public class UploadPostActivity extends AppCompatActivity {
         uploadProgress = findViewById(R.id.uploadProgress);
         postButton = findViewById(R.id.post_button);
         backButton = findViewById(R.id.back_button);
+
+        forumFieldsLayout = findViewById(R.id.forum_fields);
+        forumTopicInput = findViewById(R.id.forum_topic);
+        forumStepsInput = findViewById(R.id.forum_steps);
+        forumDifficultySpinner = findViewById(R.id.forum_difficulty);
 
         storage = FirebaseStorage.getInstance();
         firestore = FirebaseFirestore.getInstance();
@@ -194,6 +202,50 @@ public class UploadPostActivity extends AppCompatActivity {
             titleInput.setText(editingPost.getTitle());
             descriptionInput.setText(editingPost.getContent());
 
+            if ("forum".equalsIgnoreCase(editingPost.getCategory())) {
+                forumFieldsLayout.setVisibility(View.VISIBLE);
+
+                titleInput.setVisibility(View.GONE);
+                descriptionInput.setVisibility(View.GONE);
+                imageRecycler.setVisibility(View.GONE);
+                findViewById(R.id.titleInputLayout).setVisibility(View.GONE);
+                findViewById(R.id.descriptionInputLayout).setVisibility(View.GONE);
+
+                forumTopicInput.setText(editingPost.getForumTopic());
+                forumStepsInput.setText(editingPost.getForumSteps());
+
+                String difficulty = editingPost.getForumDifficulty();
+                if (difficulty != null) {
+                    SpinnerAdapter spinnerAdapter = forumDifficultySpinner.getAdapter();
+                    if (spinnerAdapter instanceof ArrayAdapter) {
+                        @SuppressWarnings("unchecked")
+                        ArrayAdapter<String> adapter = (ArrayAdapter<String>) spinnerAdapter;
+                        int index = adapter.getPosition(difficulty);
+                        if (index >= 0) forumDifficultySpinner.setSelection(index);
+                    }
+                }
+
+                SpinnerAdapter spinnerAdapter = categorySpinner.getAdapter();
+                if (spinnerAdapter instanceof ArrayAdapter) {
+                    @SuppressWarnings("unchecked")
+                    ArrayAdapter<String> arrayAdapter = (ArrayAdapter<String>) spinnerAdapter;
+                    int forumIndex = arrayAdapter.getPosition("Forum");
+                    if (forumIndex >= 0) {
+                        categorySpinner.setSelection(forumIndex);
+                        categorySpinner.setEnabled(false);
+                    }
+                }
+
+            } else {
+                forumFieldsLayout.setVisibility(View.GONE);
+
+                titleInput.setVisibility(View.VISIBLE);
+                descriptionInput.setVisibility(View.VISIBLE);
+                imageRecycler.setVisibility(View.VISIBLE);
+                findViewById(R.id.titleInputLayout).setVisibility(View.VISIBLE);
+                findViewById(R.id.descriptionInputLayout).setVisibility(View.VISIBLE);
+            }
+
             String category = editingPost.getCategory();
             if (category != null) {
                 SpinnerAdapter rawAdapter = categorySpinner.getAdapter();
@@ -221,6 +273,14 @@ public class UploadPostActivity extends AppCompatActivity {
 
             imageRecycler.setVisibility(View.GONE);
         }
+
+        ArrayAdapter<String> difficultyAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_dropdown_item,
+                Arrays.asList("Beginner", "Intermediate", "Advanced")
+        );
+        forumDifficultySpinner.setAdapter(difficultyAdapter);
+
     }
 
     private void showImagePreviewDialog(int position) {
@@ -236,14 +296,50 @@ public class UploadPostActivity extends AppCompatActivity {
     }
 
     private void setupCategorySpinner() {
-        List<String> categories = Arrays.asList("Tutorial", "Pattern Guide", "Forum");
+        List<String> displayCategories = new ArrayList<>();
+        for (String display : CategoryUtil.displayToValueMap.keySet()) {
+            if (!display.equals("Trends")) {
+                displayCategories.add(display);
+            }
+        }
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_dropdown_item,
-                categories
+                displayCategories
         );
         categorySpinner.setAdapter(adapter);
+
+        categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                if (isEditMode && editingPost != null && "forum".equalsIgnoreCase(editingPost.getCategory())) {
+                    return;
+                }
+
+                String selected = parent.getItemAtPosition(position).toString();
+
+                boolean isForum = selected.equalsIgnoreCase("Forum");
+
+                forumFieldsLayout.setVisibility(isForum ? View.VISIBLE : View.GONE);
+
+                titleInput.setVisibility(isForum ? View.GONE : View.VISIBLE);
+                descriptionInput.setVisibility(isForum ? View.GONE : View.VISIBLE);
+                imageRecycler.setVisibility(isForum ? View.GONE : View.VISIBLE);
+                findViewById(R.id.titleInputLayout).setVisibility(isForum ? View.GONE : View.VISIBLE);
+                findViewById(R.id.descriptionInputLayout).setVisibility(isForum ? View.GONE : View.VISIBLE);
+
+                if (!isForum && imageUris.isEmpty()) {
+                    Toast.makeText(UploadPostActivity.this, "Don't forget to add at least one photo for this post!", Toast.LENGTH_SHORT).show();
+                    selectMedia();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
     }
 
     private void suggestCategory(String tab) {
@@ -264,6 +360,14 @@ public class UploadPostActivity extends AppCompatActivity {
 
 
     private void selectMedia() {
+        String selectedDisplayCategory = categorySpinner.getSelectedItem().toString();
+        String actualCategory = CategoryUtil.displayToValueMap.getOrDefault(selectedDisplayCategory, "tutorial");
+
+        if ("forum".equalsIgnoreCase(actualCategory)) {
+            Toast.makeText(this, "Forum posts do not support media uploads.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (isEditMode) {
             Toast.makeText(this, "Edit mode is on. You can’t add new media now.", Toast.LENGTH_SHORT).show();
             return;
@@ -281,34 +385,65 @@ public class UploadPostActivity extends AppCompatActivity {
     }
 
     private void uploadPost() {
+        String selectedDisplayCategory = categorySpinner.getSelectedItem().toString();
+        String actualCategory = CategoryUtil.displayToValueMap.getOrDefault(selectedDisplayCategory, "tutorial");
+        boolean isForum = "forum".equalsIgnoreCase(actualCategory);
+
         if (!postButton.isEnabled()) return;
         postButton.setEnabled(false);
 
         String title = titleInput.getText().toString().trim();
         String description = descriptionInput.getText().toString().trim();
 
-        if (title.isEmpty()) {
-            Toast.makeText(this, "Please add a title.", Toast.LENGTH_SHORT).show();
-            postButton.setEnabled(true);
-            return;
-        }
+        String forumTopic = forumTopicInput.getText().toString().trim();
+        String forumSteps = forumStepsInput.getText().toString().trim();
 
-        if (description.isEmpty()) {
-            Toast.makeText(this, "Please add a description.", Toast.LENGTH_SHORT).show();
-            postButton.setEnabled(true);
-            return;
-        }
+        if (isForum) {
+            if (forumTopic.isEmpty()) {
+                forumTopicInput.setError("Topic cannot be empty");
+                forumTopicInput.requestFocus();
+                postButton.setEnabled(true);
+                uploadProgress.setVisibility(View.GONE);
+                return;
+            }
+            if (forumSteps.isEmpty()) {
+                forumStepsInput.setError("Steps/Details cannot be empty");
+                forumStepsInput.requestFocus();
+                postButton.setEnabled(true);
+                uploadProgress.setVisibility(View.GONE);
+                return;
+            }
 
-        if (imageUris.isEmpty()) {
-            Toast.makeText(this, "Please select at least one media file.", Toast.LENGTH_SHORT).show();
-            postButton.setEnabled(true);
-            return;
+        } else {
+            if (title.isEmpty()) {
+                titleInput.setError("Title cannot be empty");
+                titleInput.requestFocus();
+                postButton.setEnabled(true);
+                uploadProgress.setVisibility(View.GONE);
+                return;
+            }
+
+            if (description.isEmpty()) {
+                descriptionInput.setError("Description cannot be empty");
+                descriptionInput.requestFocus();
+                postButton.setEnabled(true);
+                uploadProgress.setVisibility(View.GONE);
+                return;
+            }
+
+            if (imageUris.isEmpty()) {
+                Toast.makeText(this, "Please select at least one media file.", Toast.LENGTH_SHORT).show();
+                postButton.setEnabled(true);
+                uploadProgress.setVisibility(View.GONE);
+                return;
+            }
         }
 
         FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser == null) {
             Toast.makeText(this, "You're not logged in. Please sign in to post.", Toast.LENGTH_SHORT).show();
             postButton.setEnabled(true);
+            uploadProgress.setVisibility(View.GONE);
             return;
         }
 
@@ -322,16 +457,33 @@ public class UploadPostActivity extends AppCompatActivity {
 
                     if (isEditMode) {
                         Map<String, Object> updates = new HashMap<>();
-                        updates.put("title", title);
-                        updates.put("content", description);
-                        updates.put("category", categorySpinner.getSelectedItem().toString());
-                        List<String> currentMediaUrls = new ArrayList<>();
 
-                        for (Uri uri : imageUris) {
-                            currentMediaUrls.add(uri.toString());
+                        updates.put("category", actualCategory);
+
+                        if (isForum) {
+                            updates.put("forumTopic", forumTopic);
+                            updates.put("forumSteps", forumSteps);
+                            updates.put("forumDifficulty", forumDifficultySpinner.getSelectedItem().toString());
+
+                            updates.put("title", null);
+                            updates.put("content", null);
+                            updates.put("mediaUrls", new ArrayList<>());
+                            updates.put("mediaType", "text");
+                        } else {
+                            updates.put("title", title);
+                            updates.put("content", description);
+
+                            updates.remove("forumTopic");
+                            updates.remove("forumSteps");
+                            updates.remove("forumDifficulty");
+
+                            List<String> currentMediaUrls = new ArrayList<>();
+                            for (Uri uri : imageUris) {
+                                currentMediaUrls.add(uri.toString());
+                            }
+                            updates.put("mediaUrls", currentMediaUrls);
+                            updates.put("mediaType", "image");
                         }
-
-                        updates.put("mediaUrls", currentMediaUrls);
 
                         firestore.collection("posts").document(editingPostId)
                                 .update(updates)
@@ -348,42 +500,71 @@ public class UploadPostActivity extends AppCompatActivity {
                     } else {
                         List<String> uploadedUrls = new ArrayList<>();
 
-                        uploadRecursive(imageUris, 0, uploadedUrls, () -> {
-                            Map<String, Object> post = new HashMap<>();
-                            post.put("userId", userId);
-                            post.put("username", username != null ? username : "Unknown");
-                            post.put("userAvatar", avatarUrl);
-                            post.put("title", title);
-                            post.put("content", description);
-                            post.put("mediaUrls", uploadedUrls);
-                            post.put("mediaType", "image");
-                            post.put("category", categorySpinner.getSelectedItem().toString());
-                            post.put("timestamp", FieldValue.serverTimestamp());
-                            post.put("likeCount", 0);
-                            post.put("favouriteCount", 0);
-                            post.put("commentCount", 0);
-
-                            firestore.collection("posts").add(post)
-                                    .addOnSuccessListener(ref -> {
-                                        uploadProgress.setVisibility(View.GONE);
-                                        Toast.makeText(this, "Uploaded successfully.", Toast.LENGTH_SHORT).show();
-                                        Intent intent = new Intent(this, HomeActivity.class);
-                                        intent.putExtra("target_tab", getIntent().getStringExtra("source_tab"));
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                        startActivity(intent);
-                                        finish();
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        uploadProgress.setVisibility(View.GONE);
-                                        postButton.setEnabled(true);
-                                        Toast.makeText(this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                    });
-                        });
+                        if (!isForum && !imageUris.isEmpty()) {
+                            uploadRecursive(imageUris, 0, uploadedUrls, () -> createAndSavePost(userId, username, avatarUrl, actualCategory, title, description, uploadedUrls, forumTopic, forumSteps, forumDifficultySpinner.getSelectedItem().toString()));
+                        } else if (isForum) {
+                            createAndSavePost(userId, username, avatarUrl, actualCategory, title, description, uploadedUrls, forumTopic, forumSteps, forumDifficultySpinner.getSelectedItem().toString());
+                        } else {
+                            uploadProgress.setVisibility(View.GONE);
+                            postButton.setEnabled(true);
+                            Toast.makeText(this, "Internal error: No media for non-forum post.", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 })
                 .addOnFailureListener(e -> {
                     uploadProgress.setVisibility(View.GONE);
                     postButton.setEnabled(true);
+                    Toast.makeText(this, "Failed to get user data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void createAndSavePost(String userId, String username, String avatarUrl, String actualCategory,
+                                   String title, String description, List<String> uploadedUrls,
+                                   String forumTopic, String forumSteps, String forumDifficulty) {
+
+        Map<String, Object> post = new HashMap<>();
+        post.put("userId", userId);
+        post.put("username", username != null ? username : "Unknown");
+        post.put("userAvatar", avatarUrl);
+
+        if ("forum".equalsIgnoreCase(actualCategory)) {
+            post.put("forumTopic", forumTopic);
+            post.put("forumSteps", forumSteps);
+            post.put("forumDifficulty", forumDifficulty);
+            post.put("mediaUrls", new ArrayList<>());
+            post.put("mediaType", "text");
+            post.put("title", null);
+            post.put("content", null);
+        } else {
+            post.put("title", title);
+            post.put("content", description);
+            post.put("mediaUrls", uploadedUrls);
+            post.put("mediaType", "image");
+            post.remove("forumTopic");
+            post.remove("forumSteps");
+            post.remove("forumDifficulty");
+        }
+
+        post.put("category", actualCategory);
+        post.put("timestamp", FieldValue.serverTimestamp());
+        post.put("likeCount", 0);
+        post.put("favouriteCount", 0);
+        post.put("commentCount", 0);
+
+        firestore.collection("posts").add(post)
+                .addOnSuccessListener(ref -> {
+                    uploadProgress.setVisibility(View.GONE);
+                    Toast.makeText(this, "Uploaded successfully.", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(this, HomeActivity.class);
+                    intent.putExtra("target_tab", getIntent().getStringExtra("source_tab"));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    uploadProgress.setVisibility(View.GONE);
+                    postButton.setEnabled(true);
+                    Toast.makeText(this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 

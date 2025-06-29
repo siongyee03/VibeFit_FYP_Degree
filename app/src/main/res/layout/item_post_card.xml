@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:cardCornerRadius="12dp"
@@ -73,12 +74,38 @@
             android:layout_marginTop="4dp"
             style="@style/FontRobotoRegular" />
 
+        <TextView
+            android:id="@+id/forum_topic_preview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textColor="@color/black_text"
+            android:layout_marginTop="6dp"
+            android:textSize="15sp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:visibility="gone"
+            android:fontFamily="@font/roboto_regular"
+            android:text="@string/topic" />
+
+        <TextView
+            android:id="@+id/forum_difficulty_preview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:textColor="@color/black_text"
+            android:layout_marginTop="4dp"
+            android:visibility="gone"
+            android:fontFamily="@font/roboto_regular"
+            android:text="@string/difficulty_level" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="end|center_vertical"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="8dp"
+            tools:ignore="UseCompoundDrawables">
 
             <ImageView
                 android:id="@+id/like_icon"

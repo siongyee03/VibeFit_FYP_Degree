@@ -25,6 +25,9 @@ public class Post implements Parcelable {
     private String userId;
     private Timestamp timestamp;
     private int commentCount;
+    private String forumTopic;
+    private String forumSteps;
+    private String forumDifficulty;
 
     public Post() {
         mediaUrls = new ArrayList<>();
@@ -46,6 +49,10 @@ public class Post implements Parcelable {
         content = in.readString();
         timestamp = in.readParcelable(Timestamp.class.getClassLoader());
         commentCount = in.readInt();
+
+        forumTopic = in.readString();
+        forumSteps = in.readString();
+        forumDifficulty = in.readString();
     }
 
     public static final Creator<Post> CREATOR = new Creator<Post>() {
@@ -82,6 +89,10 @@ public class Post implements Parcelable {
         parcel.writeString(content);
         parcel.writeParcelable(timestamp, i);
         parcel.writeInt(commentCount);
+
+        parcel.writeString(forumTopic);
+        parcel.writeString(forumSteps);
+        parcel.writeString(forumDifficulty);
     }
 
     // Getters and Setters
@@ -127,45 +138,37 @@ public class Post implements Parcelable {
     public int getCommentCount() { return commentCount; }
     public void setCommentCount(int commentCount) { this.commentCount = commentCount; }
 
+    public String getForumTopic() {
+        return forumTopic;
+    }
+    public void setForumTopic(String forumTopic) {
+        this.forumTopic = forumTopic;
+    }
+
+    public String getForumSteps() {
+        return forumSteps;
+    }
+    public void setForumSteps(String forumSteps) {
+        this.forumSteps = forumSteps;
+    }
+
+    public String getForumDifficulty() {
+        return forumDifficulty;
+    }
+    public void setForumDifficulty(String forumDifficulty) {
+        this.forumDifficulty = forumDifficulty;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         Post post = (Post) o;
-
-        if (timestampSeconds != post.timestampSeconds) return false;
-        if (likeCount != post.likeCount) return false;
-        if (favouriteCount != post.favouriteCount) return false;
-        if (commentCount != post.commentCount) return false;
-        if (!username.equals(post.username)) return false;
-        if (!userAvatar.equals(post.userAvatar)) return false;
-        if (!category.equals(post.category)) return false;
-        if (!title.equals(post.title)) return false;
-        if (!content.equals(post.content)) return false;
-        if (!mediaUrls.equals(post.mediaUrls)) return false;
-        if (!id.equals(post.id)) return false;
-        if (!mediaType.equals(post.mediaType)) return false;
-        if (!userId.equals(post.userId)) return false;
-        return Objects.equals(timestamp, post.timestamp);
+        return id != null && id.equals(post.id);
     }
 
     @Override
     public int hashCode() {
-        int result = username.hashCode();
-        result = 31 * result + userAvatar.hashCode();
-        result = 31 * result + category.hashCode();
-        result = 31 * result + Long.hashCode(timestampSeconds);
-        result = 31 * result + title.hashCode();
-        result = 31 * result + content.hashCode();
-        result = 31 * result + likeCount;
-        result = 31 * result + mediaUrls.hashCode();
-        result = 31 * result + id.hashCode();
-        result = 31 * result + favouriteCount;
-        result = 31 * result + mediaType.hashCode();
-        result = 31 * result + userId.hashCode();
-        result = 31 * result + (timestamp != null ? timestamp.hashCode() : 0);
-        result = 31 * result + commentCount;
-        return result;
+        return id != null ? id.hashCode() : 0;
     }
 }

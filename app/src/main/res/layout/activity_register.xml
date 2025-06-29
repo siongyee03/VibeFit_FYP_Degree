@@ -170,12 +170,20 @@
                     app:tint="#99000000" />
             </RelativeLayout>
 
+            <TextView
+                style="@style/FontRobotoMonoRegular"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/gender_icon"
+                android:textSize="18sp"
+                android:textStyle="bold" />
             <!-- Gender Spinner -->
             <Spinner
                 android:id="@+id/spinner_gender"
                 android:layout_width="match_parent"
                 android:layout_height="57dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="5dp"
                 android:spinnerMode="dropdown"
                 android:prompt="@string/select_gender"
                 android:background="@drawable/edittext_bg"

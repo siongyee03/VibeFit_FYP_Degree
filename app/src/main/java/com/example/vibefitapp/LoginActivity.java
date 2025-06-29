@@ -20,6 +20,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 //login authentication
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -176,11 +177,12 @@ public class LoginActivity extends AppCompatActivity {
             currentUser.reload().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     if (currentUser.isEmailVerified()) {
+                        syncEmailToFirestoreIfNeeded(currentUser);
+
                         db.collection("users").document(currentUser.getUid())
                                 .get()
                                 .addOnSuccessListener(doc -> {
                                     if (doc.exists()) {
-
                                         Boolean isDisabled = doc.getBoolean("disabled");
                                         if (Boolean.TRUE.equals(isDisabled)) {
                                             Toast.makeText(this, "This account has been disabled.", Toast.LENGTH_LONG).show();
@@ -232,6 +234,8 @@ public class LoginActivity extends AppCompatActivity {
                                         .get()
                                         .addOnSuccessListener(documentSnapshot -> {
                                             if (documentSnapshot.exists()) {
+
+                                                syncEmailToFirestoreIfNeeded(user);
 
                                                 Boolean isDisabled = documentSnapshot.getBoolean("disabled");
                                                 if (Boolean.TRUE.equals(isDisabled)) {
@@ -317,9 +321,14 @@ public class LoginActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Enter Admin Invite Code");
 
+        TextInputLayout inputLayout = new TextInputLayout(this);
+        inputLayout.setPadding(64, 16, 64, 0);
+
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(input);
+        inputLayout.addView(input);
+
+        builder.setView(inputLayout);
 
         builder.setPositiveButton("Submit", (dialog, which) -> {
             String code = input.getText().toString().trim();
@@ -338,6 +347,24 @@ public class LoginActivity extends AppCompatActivity {
 
     public static Spanned fromHtmlCompat(String html) {
         return Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY);
+    }
+
+    private void syncEmailToFirestoreIfNeeded(FirebaseUser user) {
+        String authEmail = user.getEmail();
+        if (authEmail == null) return;
+
+        db.collection("users").document(user.getUid())
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        String firestoreEmail = doc.getString("email");
+                        if (firestoreEmail == null || !firestoreEmail.equals(authEmail)) {
+                            doc.getReference().update("email", authEmail)
+                                    .addOnSuccessListener(aVoid -> Log.d("LoginActivity", "Email synced to Firestore"))
+                                    .addOnFailureListener(e -> Log.e("LoginActivity", "Failed to sync email", e));
+                        }
+                    }
+                });
     }
 }
 

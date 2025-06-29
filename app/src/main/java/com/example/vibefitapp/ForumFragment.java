@@ -4,6 +4,6 @@ public class ForumFragment extends BasePostsFragment {
 
     @Override
     protected String getCategory() {
-        return "Forum";
+        return "forum";
     }
 }

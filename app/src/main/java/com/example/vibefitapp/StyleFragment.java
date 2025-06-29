@@ -440,7 +440,7 @@ public class StyleFragment extends Fragment {
                 addMessage(new ChatMessage("AI", "Fetching images for: " + lastRecommendationQuery + "...", false));
                 chatRecyclerView.scrollToPosition(viewModel.getMessageList().size() - 1);
 
-                fetchOutfitImagesFromWeb(lastRecommendationQuery);
+                fetchOutfitImagesFromWeb(ensureFashionContext(lastRecommendationQuery));
                 lastRecommendationQuery = null;
             } else {
                 addMessage(new ChatMessage("AI", "Got it! I just don’t have any image ideas to share at the moment.", false));
@@ -572,6 +572,16 @@ public class StyleFragment extends Fragment {
                 .replaceAll("[.,!?:]", "")
                 .replaceAll("\\s+", " ")
                 .trim();
+    }
+
+    private String ensureFashionContext(String query) {
+        if (query == null) return null;
+
+        if (!query.toLowerCase().matches(".*\\b(outfit|style|fashion|clothing|attire|wear)\\b.*")) {
+            return query + " outfit";
+        }
+
+        return query;
     }
 
     private void fetchOutfitImagesFromWeb(String query) {

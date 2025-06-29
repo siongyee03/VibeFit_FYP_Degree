@@ -23,8 +23,8 @@
         android:id="@+id/input_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:padding="8dp">
 
         <!-- Upload Image Button -->
@@ -32,19 +32,20 @@
             android:id="@+id/upload_image_button"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/upload_image"
-            android:paddingStart="0dp"
-            android:paddingEnd="16dp"
-            android:src="@drawable/ic_upload" />
+            android:src="@drawable/ic_upload"
+            android:scaleType="centerInside"
+            android:padding="6dp"/>
 
+        <!-- Input Field -->
         <EditText
             android:id="@+id/user_input"
-            style="@style/FontRobotoMonoRegular"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:autofillHints="no"
+            android:autofillHints="text"
             android:background="@drawable/edittext_bg"
             android:hint="@string/send_message"
             android:inputType="textMultiLine"
@@ -52,12 +53,16 @@
             android:minHeight="48dp"
             android:padding="10dp" />
 
+        <!-- Send Button -->
         <ImageButton
             android:id="@+id/send_button"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:layout_marginStart="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/send"
-            android:src="@drawable/ic_send" />
+            android:src="@drawable/ic_send"
+            android:scaleType="centerInside"
+            android:padding="8dp"/>
     </LinearLayout>
 </LinearLayout>

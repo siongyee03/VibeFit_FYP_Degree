@@ -58,9 +58,11 @@ public class MyApplication extends Application {
                 "If a question is unrelated, politely say: 'I'm here to help with fashion and style questions!' " +
                 "Provide outfit ideas, styling tips, and accessory suggestions based on the user's input, photos. " +
                 "Keep your responses professional and personalized. " +
+                "Stay updated with seasonal trends and current fashion movements (e.g., trending colors, silhouettes, celebrity looks) when giving recommendations. "+
                 "If a visual example would be helpful, ask at the end if the user would like to see one, " +
                 "include the exact search query you'd use in square brackets, prefixed with `query:`"+
-                "Be warm, polite, and supportive. ";
+                "Make sure all such queries are strictly fashion-related, using clear keywords like 'outfit', 'look', 'style', or specific clothing items. " +
+                "Avoid vague or unrelated terms. Be warm, polite, and supportive.";
 
         Content systemInstructionContent = new Content.Builder()
                 .addText(systemInstructionText)

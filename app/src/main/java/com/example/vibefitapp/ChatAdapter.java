@@ -8,6 +8,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -74,6 +76,24 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return messageList.size();
     }
 
+    private Spanned convertMarkdownToHtml(String markdown) {
+        if (markdown == null || markdown.isEmpty()) {
+            return Html.fromHtml("", Html.FROM_HTML_MODE_COMPACT);
+        }
+
+        // Convert **bold** to <b>bold</b>
+        String html = markdown.replaceAll("\\*\\*(.*?)\\*\\*", "<b>$1</b>");
+
+        // Convert double newlines to paragraph breaks
+        html = html.replaceAll("\n\n", "<br><br>");
+
+        // Convert single newline to line break
+        html = html.replaceAll("(?<!<br>)\n", "<br>");
+
+        return Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT);
+    }
+
+
     // ViewHolder for user messages
     class UserMessageViewHolder extends RecyclerView.ViewHolder {
         TextView messageText;
@@ -87,7 +107,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         void bind(ChatMessage message) {
             if (message.getText() != null && !message.getText().isEmpty()) {
-                messageText.setText(message.getText());
+                messageText.setText(convertMarkdownToHtml(message.getText()));
                 messageText.setVisibility(View.VISIBLE);
             } else {
                 messageText.setVisibility(View.GONE);
@@ -128,7 +148,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         void bind(ChatMessage message) {
             if (message.getText() != null && !message.getText().isEmpty()) {
-                messageText.setText(message.getText());
+                messageText.setText(convertMarkdownToHtml(message.getText()));
                 messageText.setVisibility(View.VISIBLE);
             } else {
                 messageText.setVisibility(View.GONE);

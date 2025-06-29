@@ -58,13 +58,37 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                 .error(R.drawable.ic_avatar_placeholder)
                 .into(holder.avatar);
 
-        String previewUrl = post.getMediaUrls() != null && !post.getMediaUrls().isEmpty() ? post.getMediaUrls().get(0) : null;
-        Glide.with(context)
-                .load(previewUrl != null ? previewUrl : R.drawable.image_placeholder)
-                .into(holder.media);
+        if ("forum".equalsIgnoreCase(post.getCategory())) {
+            // Hide tutorial/pattern specific elements
+            holder.media.setVisibility(View.GONE);
+            holder.title.setVisibility(View.GONE);
+            holder.description.setVisibility(View.GONE);
 
-        holder.title.setText(post.getTitle());
-        holder.description.setText(post.getContent());
+            // Show forum specific elements and populate
+            holder.forumTopicPreview.setVisibility(View.VISIBLE);
+            holder.forumDifficultyPreview.setVisibility(View.VISIBLE);
+
+            holder.forumTopicPreview.setText(context.getString(R.string.forum_topic_prefix, post.getForumTopic()));
+            holder.forumDifficultyPreview.setText(context.getString(R.string.forum_difficulty_prefix, post.getForumDifficulty()));
+
+        } else {
+            holder.media.setVisibility(View.VISIBLE);
+            holder.title.setVisibility(View.VISIBLE);
+            holder.description.setVisibility(View.VISIBLE);
+
+            String previewUrl = post.getMediaUrls() != null && !post.getMediaUrls().isEmpty() ? post.getMediaUrls().get(0) : null;
+            Glide.with(context)
+                    .load(previewUrl != null ? previewUrl : R.drawable.image_placeholder)
+                    .into(holder.media);
+
+            holder.title.setText(post.getTitle());
+            holder.description.setText(post.getContent());
+
+            // Hide forum specific elements
+            holder.forumTopicPreview.setVisibility(View.GONE);
+            holder.forumDifficultyPreview.setVisibility(View.GONE);
+        }
+
         holder.likeCount.setText(String.valueOf(post.getLikeCount()));
 
         holder.itemView.setOnClickListener(v -> {
@@ -136,6 +160,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     public static class PostViewHolder extends RecyclerView.ViewHolder {
         ImageView avatar, media, likeIcon;
         TextView username, title, description, likeCount;
+        TextView forumTopicPreview, forumDifficultyPreview;
 
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -146,6 +171,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             description = itemView.findViewById(R.id.post_description);
             likeCount = itemView.findViewById(R.id.like_count);
             likeIcon = itemView.findViewById(R.id.like_icon);
+            forumTopicPreview = itemView.findViewById(R.id.forum_topic_preview);
+            forumDifficultyPreview = itemView.findViewById(R.id.forum_difficulty_preview);
         }
     }
 
