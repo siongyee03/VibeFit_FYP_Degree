@@ -76,6 +76,7 @@
     <string name="send_comment">send comment</string>
     <string name="comment_count">0</string>
     <string name="replying_to">Replying to @%1$s:</string>
+    <string name="number_steps">numbering</string>
 
     <!--Closet-->
     <string name="height">Height</string>

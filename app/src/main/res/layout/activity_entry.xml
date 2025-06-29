@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="12dp"
+            android:paddingTop="32dp"
+            android:paddingEnd="12dp">
+
+            <ImageButton
+                android:id="@+id/backButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@null"
+                android:contentDescription="@string/back_button"
+                android:padding="8dp"
+                android:src="@drawable/ic_close_cancel" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="24dp">
+
+            <ImageView
+                android:id="@+id/logoImage"
+                android:layout_width="242dp"
+                android:layout_height="242dp"
+                android:layout_gravity="center"
+                android:src="@drawable/logo_vibefit"
+                android:contentDescription="@string/avatar_description" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/loginButton"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:layout_marginTop="48dp"
+                android:text="@string/login"
+                android:textAllCaps="true"
+                android:textSize="20sp"
+                android:maxWidth="320dp"
+                style="@style/ButtonStyle"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/registerButton"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:layout_marginTop="12dp"
+                android:text="@string/register"
+                android:textAllCaps="true"
+                android:textSize="20sp"
+                android:backgroundTint="@color/white"
+                app:strokeColor="@color/black_text"
+                app:strokeWidth="1dp"
+                android:textColor="@color/black_text"
+                android:fontFamily="@font/roboto_mono_regular"
+                android:maxWidth="320dp"
+                style="@style/ButtonStyle"/>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

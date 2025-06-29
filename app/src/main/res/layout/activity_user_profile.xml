@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Top bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp">
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="22dp"
+                android:background="@null"
+                android:contentDescription="@string/back_button"
+                android:padding="8dp"
+                android:src="@drawable/ic_arrow_back" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- Title -->
+            <TextView
+                android:id="@+id/tv_edit_profile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:fontFamily="@font/roboto_mono_regular"
+                android:paddingBottom="16dp"
+                android:text="@string/edit_profile"
+                android:textColor="#000000"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="12dp">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:layout_gravity="center"
+                    android:layout_margin="32dp"
+                    app:cardBackgroundColor="@android:color/white"
+                    app:cardCornerRadius="75dp"
+                    app:cardElevation="6dp"
+                    app:strokeWidth="3dp">
+                    <!-- Avatar -->
+                    <ImageView
+                        android:id="@+id/avatar"
+                        android:layout_width="142dp"
+                        android:layout_height="142dp"
+                        android:layout_gravity="center"
+                        android:layout_margin="32dp"
+                        android:clickable="true"
+                        android:contentDescription="@string/avatar_description"
+                        android:focusable="true"
+                        android:src="@drawable/ic_avatar_placeholder" />
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginBottom="25dp"
+                    app:cardBackgroundColor="@android:color/white"
+                    app:cardCornerRadius="22dp"
+                    app:cardElevation="6dp">
+
+                    <!-- Add Photo Icon -->
+                    <ImageView
+                        android:id="@+id/iv_add_photo"
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/addPhoto"
+                        android:scaleType="center"
+                        android:src="@drawable/ic_add_circle" />
+                </androidx.cardview.widget.CardView>
+
+            </FrameLayout>
+
+            <TextView
+                style="@style/FontRobotoMonoRegular"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/username"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+            <!-- Username -->
+            <EditText
+                android:id="@+id/profile_username"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:layout_marginTop="5dp"
+                android:autofillHints="username"
+                android:background="@drawable/edittext_bg"
+                android:hint="@string/enter_username"
+                android:inputType="text"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp" />
+
+            <TextView
+                style="@style/FontRobotoMonoRegular"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/email"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+            <!-- Email -->
+            <EditText
+                android:id="@+id/profile_email"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:layout_marginTop="5dp"
+                android:autofillHints="emailAddress"
+                android:background="@drawable/edittext_bg"
+                android:hint="@string/enter_email"
+                android:inputType="textEmailAddress"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp" />
+
+            <TextView
+                style="@style/FontRobotoMonoRegular"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/contact_number"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+            <!-- Contact -->
+            <EditText
+                android:id="@+id/profile_contact"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:layout_marginTop="5dp"
+                android:autofillHints="phone"
+                android:background="@drawable/edittext_bg"
+                android:hint="@string/enter_contact"
+                android:inputType="phone"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp" />
+
+            <TextView
+                style="@style/FontRobotoMonoRegular"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/gender_icon"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+            <!-- Gender Spinner -->
+            <Spinner
+                android:id="@+id/profile_gender"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/edittext_bg"
+                android:fontFamily="@font/roboto_mono_regular"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:prompt="@string/select_gender"
+                android:spinnerMode="dropdown" />
+
+            <!-- Register Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_update"
+                style="@style/ButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:layout_marginTop="32dp"
+                android:text="@string/update"
+                android:textAllCaps="true"
+                android:textSize="20sp" />
+
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/etUsername"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints="username"
+        android:hint="@string/username"
+        android:inputType="text"
+        android:singleLine="true"/>
+
+    <EditText
+        android:id="@+id/etEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:autofillHints="id"
+        android:hint="@string/email"
+        android:inputType="textEmailAddress"
+        android:singleLine="true"/>
+
+    <EditText
+        android:id="@+id/etPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:autofillHints="id"
+        android:hint="@string/password"
+        android:inputType="textPassword"
+        android:singleLine="true"/>
+
+    <TextView
+        android:id="@+id/tvRoleLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/role_admin_or_superadmin"
+        android:textSize="14sp"
+        android:textColor="@color/black_text"
+        android:layout_marginTop="12dp"
+        android:fontFamily="@font/roboto_regular" />
+
+    <Spinner
+        android:id="@+id/spinnerRole"
+        android:background="@drawable/edittext_bg"
+        style="@style/FontRobotoRegular"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:minHeight="48dp"
+        android:padding="8dp"/>
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switchEnable"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/enable_admin"
+        android:checked="true"
+        android:layout_marginTop="12dp"/>
+</LinearLayout>

@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -32,9 +33,9 @@ public class UploadPostActivity extends AppCompatActivity {
     private static final int MAX_IMAGE_COUNT = 9;
     private final List<Uri> imageUris = new ArrayList<>();
     private RecyclerView imageRecycler;
-    private EditText titleInput, descriptionInput;
+    private TextInputEditText titleInput, descriptionInput;
     private LinearLayout forumFieldsLayout;
-    private EditText forumTopicInput, forumStepsInput;
+    private TextInputEditText forumTopicInput, forumStepsInput;
     private Spinner forumDifficultySpinner;
     private Spinner categorySpinner;
     private ProgressBar uploadProgress;
