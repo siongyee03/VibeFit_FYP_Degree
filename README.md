@@ -165,15 +165,15 @@ In Firebase Console > Authentication > Settings > Password policy, you can manua
 ## 📄 License
 This project is licensed under the MIT License – see the [LICENSE](./LICENSE) file for details.
 
-## 📚 Third-Party Services and Licenses
+## 📚 Third-Party APIs and Usage Terms
 
-This app uses the following third-party services:
+This app uses other APIs and libraries. Check each one’s rules or license for how you can use it.
 
 | Service        | Usage                                     | License/Terms |
 |----------------|-------------------------------------------|---------------|
 | Firebase       | Auth, Firestore, Storage, Vertex AI       | [Firebase TOS](https://firebase.google.com/terms) |
 | Unsplash API   | Image search for outfit recommendation    | [Unsplash API Guidelines](https://unsplash.com/documentation#guidelines) |
-| Glam AI API    | Virtual try-on (face fusion)              | Refer to GlamAI official terms |
+| Glam AI API    | Virtual try-on (face fusion)              | [GlamAI Terms](https://getglam.app/terms/) |
 | ImgBB API      | Upload outfit photos                      | [ImgBB Terms](https://imgbb.com/terms) |
 | Glide, OkHttp, Gson, etc. | Image loading, HTTP, JSON parsing | [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0.html) |
 
