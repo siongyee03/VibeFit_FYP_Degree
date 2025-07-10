@@ -8,7 +8,7 @@ VibeFit is a fashion and AI-powered mobile application that allows users to:
 
 ## 📱 Features
 
-- Email/password registration and login, password reset, update profile, logout.
+- **Authentication**: Register, login, logout, reset password, update profile.
 - **AI Features**:
   - Outfit recommendation using Firebase Vertex AI (Gemini).
   - Virtual Try-On with face fusion (GlamAI API).
@@ -32,30 +32,62 @@ VibeFit is a fashion and AI-powered mobile application that allows users to:
 1. **Clone the repository**:
    ```bash
    git clone https://github.com/siongyee03/FYP_Degree.git
+   ```
 2. **Open in Android Studio**
+   Make sure to select the project root folder, not just the /app subfolder.
 3. **Create your own** `google-services.json`:
    Download it from your Firebase Console.
    Place it in:
    ```bash
-   app/google-services.json
-4. **Create a** `gradle.properties` **file** in the root directory with the following:
-   
+   /app/google-services.json
+   ```
+4. Create local.properties
+   In the project root, add:
+   ```ini
+   sdk.dir=/path/to/your/sdk
+   ```
+   Example:
+   ```ini
+   sdk.dir=C:\\Users\\yourname\\AppData\\Local\\Android\\Sdk
+   ```
+
+5. **Create a** `gradle.properties` **file** in the root directory with the following:
+   ```ini
    UNSPLASH_API_KEY=your_unsplash_key
    
    VIRTUAL_TRYON_API_KEY=your_tryon_key
    
    IMGBB_API_KEY=your_imgbb_key
+   ```
+   These keys are required for API calls (virtual try-on, fashion image search, image upload).
 
-5. **Sync Gradle** and build the project.
+6. **Sync and Build**
+   - Click **"Sync Gradle"** in Android Studio.
+   - Then click **"Run"** or **Shift + F10**.
+
+## 🗂️ Project Structure
+```pgsql
+VibeFitApp/
+├── app/
+│   ├── java/com/example/vibefitapp/
+│   │   ├── activities/
+│   │   ├── adapters/
+│   │   ├── models/
+│   │   ├── utils/
+│   ├── res/
+│   ├── google-services.json         
+├── build.gradle.kts
+├── gradle.properties                
+├── local.properties                 
+└── README.md
+```
 
 ## 📦 Dependencies
 - Firebase Auth, Firestore, Storage, App Check
 - Glide
-- Retrofit / OkHttp
-- Gson
+- OkHttp
 - Gson / JSON
 - Firebase Vertex AI SDK
-- Lottie / ExoPlayer
 - Any additional dependencies are listed in build.gradle.kts
 
 ## 📁 Dataset Notes
