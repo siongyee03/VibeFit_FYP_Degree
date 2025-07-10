@@ -64,14 +64,63 @@ VibeFit is a fashion and AI-powered mobile application that allows users to:
 6. **Sync and Build**
    - Click **"Sync Gradle"** in Android Studio.
    - Then click **"Run"** or **Shift + F10**.
+  
+## 🔑 API Key Setup
+
+To run the app properly, you will need to set up your own API keys for the following services:
+
+### 🔥 Firebase (Auth, Firestore, Storage, Vertex AI, App Check)
+1. Go to [https://console.firebase.google.com](https://console.firebase.google.com)
+2. Create a new project.
+3. Add an Android app (package name must match your project’s package name, e.g., `com.example.vibefitapp`)
+4. Download `google-services.json` and place it in the `/app/` directory.
+5. In the Firebase Console, enable the following services:
+   - **Authentication** → Sign-in method → Enable **Email/Password**
+   - **Cloud Firestore** → Create a database → Start in test mode (for development)
+   - **Storage** → Create storage bucket → Start in test mode
+   - **App Check**:
+     - Go to **App Check** > **Your Android App** > Manage Debug Tokens 
+     - Copy your app’s Debug Secret printed in Logcat (from `FirebaseAppCheck.getToken()`)
+     - Paste it into the Firebase App Check Console to allow debug requests
+   - **Vertex AI**:
+     - Go to [Google Cloud Console](https://console.cloud.google.com/)
+     - Enable **Vertex AI API** under APIs & Services
+     - Make sure your Firebase project is linked to this Google Cloud project
+     - (You can use Firebase Extensions or SDK to connect)
+       
+---
+
+### 🧠 Glam AI (Virtual Try-On)
+1. Go to [https://glamai.com](https://glamai.com) or the official Glam AI API provider you're using.
+2. Sign up or log in.
+3. Get your `API_KEY` from the developer dashboard.
+4. Set `VIRTUAL_TRYON_API_KEY=your_key` in `gradle.properties`.
+
+---
+
+### 📷 Unsplash API (Fashion Image Search)
+1. Visit [https://unsplash.com/developers](https://unsplash.com/developers)
+2. Register as a developer and create a new app.
+3. Copy the **Access Key** (you don’t need the Secret Key).
+4. Set `UNSPLASH_API_KEY=your_key` in `gradle.properties`.
+
+---
+
+### 🖼 ImgBB API (Upload Outfit Image)
+1. Go to [https://api.imgbb.com/](https://api.imgbb.com/)
+2. Sign up and get your API key.
+3. Set `IMGBB_API_KEY=your_key` in `gradle.properties`.
+
+---
 
 ## 🗂️ Project Structure
 ```pgsql
 VibeFitApp/
 ├── app/
 │   ├── src/
-│   ├── google-services.json         
-├── build.gradle.kts
+│   ├── google-services.json
+│   ├── build.gradle.kts (Module:app)              
+├── build.gradle.kts (project)
 ├── gradle.properties                
 ├── local.properties                 
 └── README.md
@@ -92,3 +141,13 @@ Public data is fetched from Unsplash API.
 The google-services.json and gradle.properties are excluded from version control.  
 
 Ensure that you add your own credentials when testing or deploying the app.
+
+
+## 📄 License
+This project is licensed under the MIT License – see the [LICENSE](./LICENSE) file for details.
+
+## 🙋‍♂️ Author
+Wong Siong Yee
+Final Year Project (FYP) 2025 – Multimedia University Melaka (MMU)
+
+Feel free to open an issue or contact me on GitHub for questions.
