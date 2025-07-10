@@ -1,0 +1,5 @@
+# Example gradle.properties
+
+UNSPLASH_API_KEY=your_unsplash_key_here
+VIRTUAL_TRYON_API_KEY=your_tryon_key_here
+IMGBB_API_KEY=your_imgbb_key_here
