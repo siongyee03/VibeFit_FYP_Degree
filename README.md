@@ -69,12 +69,7 @@ VibeFit is a fashion and AI-powered mobile application that allows users to:
 ```pgsql
 VibeFitApp/
 ├── app/
-│   ├── java/com/example/vibefitapp/
-│   │   ├── activities/
-│   │   ├── adapters/
-│   │   ├── models/
-│   │   ├── utils/
-│   ├── res/
+│   ├── src/
 │   ├── google-services.json         
 ├── build.gradle.kts
 ├── gradle.properties                
