@@ -63,7 +63,7 @@ import com.google.firebase.storage.StorageReference;
 public class AiTryOnActivity extends AppCompatActivity {
 
     private View loadingOverlay;
-    private TextView loadingText;
+    private TextView loadingText, tvFaceGuideline;
     private ImageView imgUserModel;
     private RecyclerView recyclerOutfit;
     private LinearLayout placeholderContainer;
@@ -71,7 +71,6 @@ public class AiTryOnActivity extends AppCompatActivity {
     private Uri userFaceUri;
     private OutfitAdapter outfitAdapter;
     private final List<Outfit> userUploadedOutfits = new ArrayList<>();
-
     private String userGender = "Prefer not to say";
     private Button btnUploadOverlay, btnChangeModel;
     private ActivityResultLauncher<Intent> facePickerLauncher;
@@ -98,6 +97,8 @@ public class AiTryOnActivity extends AppCompatActivity {
         loadingText = findViewById(R.id.loadingText);
 
         btnUploadOverlay = findViewById(R.id.btn_upload_overlay);
+        tvFaceGuideline = findViewById(R.id.tv_face_guideline);
+
         btnChangeModel = findViewById(R.id.btn_change_model);
 
         btnDownload = findViewById(R.id.btn_download);
@@ -218,8 +219,10 @@ public class AiTryOnActivity extends AppCompatActivity {
     }
 
     private void showLoading() {
-        runOnUiThread(() -> loadingOverlay.setVisibility(View.VISIBLE));
-        loadingText.setVisibility(View.VISIBLE);
+        runOnUiThread(() -> {
+            loadingOverlay.setVisibility(View.VISIBLE);
+            loadingText.setVisibility(View.VISIBLE);
+        });
     }
 
     private void hideLoading() {
@@ -263,6 +266,7 @@ public class AiTryOnActivity extends AppCompatActivity {
         placeholderContainer.setVisibility(View.GONE);
         btnUploadOverlay.setVisibility(View.GONE);
         btnChangeModel.setVisibility(View.VISIBLE);
+        tvFaceGuideline.setVisibility(View.GONE);
 
         String filename = "user_faces/" + uid + ".jpg";
         StorageReference ref = FirebaseStorage.getInstance().getReference(filename);
@@ -399,6 +403,7 @@ public class AiTryOnActivity extends AppCompatActivity {
                             placeholderContainer.setVisibility(View.GONE);
                             btnUploadOverlay.setVisibility(View.GONE);
                             btnChangeModel.setVisibility(View.VISIBLE);
+                            tvFaceGuideline.setVisibility(View.GONE);
                         }
                     }
                     if (doc.contains("glamMediaUrl")) {
@@ -595,11 +600,9 @@ public class AiTryOnActivity extends AppCompatActivity {
             return;
         }
 
-        // --- NEW LOGGING: Verify the input file ---
         Log.d("GlamAI_Upload", "Attempting to upload face file: " + faceFile.getAbsolutePath());
         Log.d("GlamAI_Upload", "File size: " + faceFile.length() + " bytes");
         Log.d("GlamAI_Upload", "File name: " + faceFile.getName());
-
 
         new Thread(() -> {
             try {
@@ -630,7 +633,6 @@ public class AiTryOnActivity extends AppCompatActivity {
                     JSONObject json = new JSONObject(resp);
                     String uploadedUrl = json.optString("file_url", "");
 
-                    // --- NEW LOGGING: Verify the received URL ---
                     if (!TextUtils.isEmpty(uploadedUrl)) {
                         Log.d("GlamAI_Upload", "Glam AI Upload Successful. Received URL: " + uploadedUrl);
 
@@ -828,9 +830,12 @@ public class AiTryOnActivity extends AppCompatActivity {
                                 }
                                 return;
                             } else if ("FAILED".equalsIgnoreCase(status)) {
+                                String reason = json.optString("error_message", "Try-on failed");
+                                String finalReason = reason.isEmpty() ? "Try-on failed" : reason;
+
                                 runOnUiThread(() -> {
                                     hideLoading();
-                                    Toast.makeText(AiTryOnActivity.this, "Try-on failed", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(AiTryOnActivity.this, finalReason, Toast.LENGTH_LONG).show();
                                 });
                                 return;
                             }

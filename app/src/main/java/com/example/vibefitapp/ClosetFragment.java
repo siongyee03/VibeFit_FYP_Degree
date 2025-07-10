@@ -255,7 +255,7 @@ public class ClosetFragment extends Fragment {
                 break;
             default:
                 genderIcon.setImageResource(R.drawable.ic_unknown);
-                genderText.setText(getString(R.string.unknown));
+                //genderText.setText(getString(R.string.unknown));
                 braSizeData.setVisibility(View.GONE);
                 braSizeText.setVisibility(View.GONE);
                 break;

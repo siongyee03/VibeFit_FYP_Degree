@@ -13,13 +13,10 @@ import com.google.firebase.ai.type.GenerativeBackend;
 import com.google.firebase.ai.type.RequestOptions;
 import com.google.firebase.appcheck.FirebaseAppCheck;
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory;
-import com.google.firebase.functions.FirebaseFunctions;
 
 public class MyApplication extends Application {
     private static final String TAG = "MyApplication";
     private static GenerativeModelFutures model;
-
-    private final String systemInstructionText = "Default fallback prompt";
 
     @Override
     public void onCreate() {
@@ -35,23 +32,9 @@ public class MyApplication extends Application {
         );
         Log.d(TAG, "Firebase App Check initialized with Debug Provider.");
 
-            /*
-            firebaseAppCheck.installAppCheckProviderFactory(
-                    PlayIntegrityAppCheckProviderFactory.getInstance());
-            Log.d(TAG, "Firebase App Check initialized with Play Integrity Provider.");
-            */
-
-
         FirebaseAppCheck.getInstance().getToken(false)
                 .addOnSuccessListener(tokenResponse -> Log.d(TAG, "App Check token is valid now. Ready to call AI."))
                 .addOnFailureListener(exception -> Log.e(TAG, "Failed to get App Check token.", exception));
-
-/*
-        com.google.firebase.auth.FirebaseAuth.getInstance().useEmulator("10.0.2.2", 9099);
-        com.google.firebase.firestore.FirebaseFirestore.getInstance().useEmulator("10.0.2.2", 8080);
-        com.google.firebase.storage.FirebaseStorage.getInstance().useEmulator("10.0.2.2", 9199);
-
- */
 
         String systemInstructionText = "You are a helpful and concise fashion assistant. " +
                 "Only respond to questions related to fashion, clothing, personal style, or outfit advice. " +

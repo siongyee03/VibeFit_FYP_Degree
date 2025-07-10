@@ -225,5 +225,6 @@
     <string name="difficulty">Difficulty:</string>
     <string name="forum_topic_prefix">Topic: %1$s</string>
     <string name="forum_difficulty_prefix">Difficulty: %1$s</string>
+    <string name="upload_face_guideline">Please upload a clear, front-facing photo of your face. Make sure your face is centered and unobstructed.</string>
 
 </resources>

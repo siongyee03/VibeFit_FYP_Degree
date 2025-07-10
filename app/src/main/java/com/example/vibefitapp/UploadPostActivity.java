@@ -94,7 +94,9 @@ public class UploadPostActivity extends AppCompatActivity {
                 this::showImagePreviewDialog,
                 this::selectMedia
         );
-        imageRecycler.setAdapter(adapter);
+        if (!isEditMode) {
+            imageRecycler.setAdapter(adapter);
+        }
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -242,7 +244,6 @@ public class UploadPostActivity extends AppCompatActivity {
 
                 titleInput.setVisibility(View.VISIBLE);
                 descriptionInput.setVisibility(View.VISIBLE);
-                imageRecycler.setVisibility(View.VISIBLE);
                 findViewById(R.id.titleInputLayout).setVisibility(View.VISIBLE);
                 findViewById(R.id.descriptionInputLayout).setVisibility(View.VISIBLE);
             }
@@ -271,8 +272,6 @@ public class UploadPostActivity extends AppCompatActivity {
             updateMediaPreview();
 
             postButton.setText(getString(R.string.update_post));
-
-            imageRecycler.setVisibility(View.GONE);
         }
 
         ArrayAdapter<String> difficultyAdapter = new ArrayAdapter<>(
@@ -593,6 +592,12 @@ public class UploadPostActivity extends AppCompatActivity {
     }
 
     private void updateMediaPreview() {
+        if (isEditMode) {
+            imageRecycler.setAdapter(null);
+            imageRecycler.setVisibility(View.GONE);
+            return;
+        }
+
         if (!imageUris.isEmpty()) {
             imageRecycler.setVisibility(View.VISIBLE);
 

@@ -2,10 +2,13 @@ package com.example.vibefitapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -180,8 +183,18 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
         final EditText passwordInput = new EditText(this);
         passwordInput.setHint("Current Password");
-        passwordInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        builder.setView(passwordInput);
+        passwordInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+
+        FrameLayout container = new FrameLayout(this);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(40, 0, 40, 0);
+        passwordInput.setLayoutParams(params);
+        container.addView(passwordInput);
+
+        builder.setView(container);
 
         builder.setPositiveButton("Confirm", (dialog, which) -> {
             String currentPassword = passwordInput.getText().toString();

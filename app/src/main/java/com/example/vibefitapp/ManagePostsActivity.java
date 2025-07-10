@@ -88,7 +88,11 @@ public class ManagePostsActivity extends AppCompatActivity implements PostAdapte
     private void loadPosts(@Nullable String searchQuery) {
         if (postsListener != null) {
             postsListener.remove();
+            postsListener = null;
         }
+
+        postList.clear();
+        postAdapter.notifyDataSetChanged();
 
         Query baseQuery = db.collection("posts")
                 .orderBy("likeCount", Query.Direction.DESCENDING)
@@ -97,57 +101,24 @@ public class ManagePostsActivity extends AppCompatActivity implements PostAdapte
         if (searchQuery == null) {
             postsListener = baseQuery.addSnapshotListener(postEventListener);
         } else {
-            postsListener = baseQuery.addSnapshotListener((value, error) -> {
-                if (error != null) {
-                    Toast.makeText(this, "Error loading posts: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (value == null) return;
-
-                String q = searchQuery.toLowerCase();
-
-                for (DocumentChange dc : value.getDocumentChanges()) {
-                    DocumentSnapshot doc = dc.getDocument();
+            baseQuery.get().addOnSuccessListener(queryDocumentSnapshots -> {
+                for (DocumentSnapshot doc : queryDocumentSnapshots) {
                     Post post = doc.toObject(Post.class);
+                    if (post == null) continue;
                     post.setId(doc.getId());
 
                     String title = post.getTitle() != null ? post.getTitle().toLowerCase() : "";
                     String content = post.getContent() != null ? post.getContent().toLowerCase() : "";
+                    String q = searchQuery.toLowerCase();
 
-                    boolean matches = title.contains(q) || content.contains(q);
-
-                    switch (dc.getType()) {
-                        case ADDED:
-                            if (matches) {
-                                postList.add(dc.getNewIndex(), post);
-                                postAdapter.notifyItemInserted(dc.getNewIndex());
-                            }
-                            break;
-                        case MODIFIED:
-                            int oldIndex = dc.getOldIndex();
-                            int newIndex = dc.getNewIndex();
-
-                            boolean wasInList = oldIndex != -1 && oldIndex < postList.size();
-                            if (wasInList) {
-                                postList.remove(oldIndex);
-                                postAdapter.notifyItemRemoved(oldIndex);
-                            }
-
-                            if (matches) {
-                                postList.add(newIndex, post);
-                                postAdapter.notifyItemInserted(newIndex);
-                            }
-                            break;
-                        case REMOVED:
-                            int removedIndex = dc.getOldIndex();
-                            if (removedIndex != -1 && removedIndex < postList.size()) {
-                                postList.remove(removedIndex);
-                                postAdapter.notifyItemRemoved(removedIndex);
-                            }
-                            break;
+                    if (title.contains(q) || content.contains(q)) {
+                        postList.add(post);
                     }
                 }
-            });
+                postAdapter.notifyDataSetChanged();
+            }).addOnFailureListener(e ->
+                    Toast.makeText(this, "Search failed: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+            );
         }
     }
 

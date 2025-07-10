@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +26,7 @@ public class MeFragment extends Fragment {
     private ImageView imgUserAvatar;
     private TextView tvUsername;
     private ConstraintLayout cardUserInfo, cardFavourite, cardSettings, cardPosts;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     private FirebaseAuth firebaseAuth;
     private ListenerRegistration userListener;
@@ -50,6 +52,12 @@ public class MeFragment extends Fragment {
 
         setupUserInfoListener();
         setupCardsClick();
+
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshMe);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            setupUserInfoListener();
+            swipeRefreshLayout.setRefreshing(false);
+        });
 
         return view;
     }

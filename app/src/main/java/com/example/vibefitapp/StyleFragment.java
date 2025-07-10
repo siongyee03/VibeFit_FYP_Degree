@@ -216,9 +216,16 @@ public class StyleFragment extends Fragment {
 
         // --- Handle the user's confirmation for images ---
         if (awaitingImageConfirmation) {
-            handlePromptForRecommendation(userInputText);
-            userInputEditText.setText("");
-            return;
+            if (userInputText.toLowerCase().matches(".*(yes|ok|good|want|sure|show|image|photo|picture|look|see|ya|好啊|行|可以|要|看看|发吧|图片|照片).*")
+                    || userInputText.toLowerCase().matches(".*(no|not|don't|do not|不用|不要|nope|算了).*")) {
+
+                handlePromptForRecommendation(userInputText);
+                userInputEditText.setText("");
+                return;
+            } else {
+                awaitingImageConfirmation = false;
+                lastRecommendationQuery = null;
+            }
         }
 
         // Prevent sending multiple messages while waiting for a response
@@ -437,9 +444,6 @@ public class StyleFragment extends Fragment {
             awaitingImageConfirmation = false;
 
             if (lastRecommendationQuery != null && !lastRecommendationQuery.isEmpty()) {
-                addMessage(new ChatMessage("AI", "Fetching images for: " + lastRecommendationQuery + "...", false));
-                chatRecyclerView.scrollToPosition(viewModel.getMessageList().size() - 1);
-
                 fetchOutfitImagesFromWeb(ensureFashionContext(lastRecommendationQuery));
                 lastRecommendationQuery = null;
             } else {
