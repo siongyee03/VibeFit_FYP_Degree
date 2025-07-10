@@ -146,6 +146,21 @@ The google-services.json and gradle.properties are excluded from version control
 
 Ensure that you add your own credentials when testing or deploying the app.
 
+## 🔑 Password Policy
+For account security, the following Firebase Authentication password policy is enforced:
+✅ Enforcement Mode: Required
+
+✅ Must include:
+- At least one uppercase letter (A–Z)
+- At least one lowercase letter (a–z)
+- At least one numeric character (0–9)
+
+✅ Minimum length: 8 characters
+
+If a user attempts to register or reset a password that does not meet these criteria, the system will reject the request and prompt them to use a stronger password.
+
+📌 Where to configure it:
+In Firebase Console > Authentication > Settings > Password policy, you can manually configure and enforce these rules for production deployment.
 
 ## 📄 License
 This project is licensed under the MIT License – see the [LICENSE](./LICENSE) file for details.
