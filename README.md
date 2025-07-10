@@ -34,15 +34,19 @@ VibeFit is a fashion and AI-powered mobile application that allows users to:
    git clone https://github.com/siongyee03/FYP_Degree.git
    ```
 2. **Open in Android Studio**
-   Make sure to select the project root folder, not just the /app subfolder.
-3. **Create your own** `google-services.json`:
+
+   Make sure to select the project root folder, not just the `/app` subfolder.
+   
+3. **Create your own** `google-services.json`
+
    Download it from your Firebase Console.
    Place it in:
    ```bash
    /app/google-services.json
    ```
-4. Create local.properties
-   In the project root, add:
+5. **Create** `local.properties`
+
+   In the project root directory, create a file named `local.properties` and add the following line (replace with your actual SDK path):
    ```ini
    sdk.dir=/path/to/your/sdk
    ```
@@ -51,7 +55,7 @@ VibeFit is a fashion and AI-powered mobile application that allows users to:
    sdk.dir=C:\\Users\\yourname\\AppData\\Local\\Android\\Sdk
    ```
 
-5. **Create a** `gradle.properties` **file** in the root directory with the following:
+7. **Create a** `gradle.properties` **file** in the root directory with the following:
    ```ini
    UNSPLASH_API_KEY=your_unsplash_key
    
@@ -61,9 +65,10 @@ VibeFit is a fashion and AI-powered mobile application that allows users to:
    ```
    These keys are required for API calls (virtual try-on, fashion image search, image upload).
 
-6. **Sync and Build**
+8. **Sync and Build**
    - Click **"Sync Gradle"** in Android Studio.
    - Then click **"Run"** or **Shift + F10**.
+     
   
 ## 🔑 API Key Setup
 
@@ -73,13 +78,15 @@ To run the app properly, you will need to set up your own API keys for the follo
 1. Go to [https://console.firebase.google.com](https://console.firebase.google.com)
 2. Create a new project.
 3. Add an Android app (package name must match your project’s package name, e.g., `com.example.vibefitapp`)
-4. Download `google-services.json` and place it in the `/app/` directory.
+4. Download `google-services.json` from **Project Settings** and place it in the `/app/` directory.
 5. In the Firebase Console, enable the following services:
    - **Authentication** → Sign-in method → Enable **Email/Password**
    - **Cloud Firestore** → Create a database → Start in test mode (for development)
    - **Storage** → Create storage bucket → Start in test mode
+   - ⚠️ For production, update your Firestore and Storage security rules to restrict access.
+
    - **App Check**:
-     - Go to **App Check** > **Your Android App** > Manage Debug Tokens 
+     - Go to **App Check** > **Your Android App** > **Manage Debug Tokens** 
      - Copy your app’s Debug Secret printed in Logcat (from `FirebaseAppCheck.getToken()`)
      - Paste it into the Firebase App Check Console to allow debug requests
    - **Enable Firebase Vertex AI (Gemini)**:
@@ -114,8 +121,30 @@ To run the app properly, you will need to set up your own API keys for the follo
 1. Go to [https://api.imgbb.com/](https://api.imgbb.com/)
 2. Sign up and get your API key.
 3. Set `IMGBB_API_KEY=your_key` in `gradle.properties`.
-
 ---
+
+## ⚠️ Firestore Indexes
+
+Some queries in the app (e.g., sorting posts, filtering by multiple fields) may require Firestore **composite indexes**.
+
+If you encounter an error like:
+
+```pgsql
+FAILED_PRECONDITION: The query requires an index. You can create it here: https://firebase.google.com/...
+```
+
+### 🛠 How to resolve:
+
+1. Copy the **link provided in the error message**.
+2. Open it in your browser.
+3. It will redirect you to the Firebase Console with the index configuration pre-filled.
+4. Click **"Create Index"** and wait a few minutes for it to complete.
+
+You can also view and manage indexes manually:
+- Go to **Firebase Console** > **Firestore Database** > **Indexes** > **Composite**
+
+Tip: During development, start with **Firestore in test mode** to avoid permission issues while configuring indexes.
+
 
 ## 🗂️ Project Structure
 ```pgsql
@@ -130,6 +159,7 @@ VibeFitApp/
 └── README.md
 ```
 
+
 ## 📦 Dependencies
 - Firebase Auth, Firestore, Storage, App Check
 - Glide
@@ -137,17 +167,23 @@ VibeFitApp/
 - Gson / JSON
 - Firebase Vertex AI SDK
 - Any additional dependencies are listed in build.gradle.kts
+  
 
 ## 📁 Dataset Notes
-Public data is fetched from Unsplash API.
+All outfit and fashion images are fetched dynamically from the Unsplash API.
+
+These images are for demonstration and testing purposes. If you use them in a deployed app or published content, make sure to follow the [Unsplash API Guidelines](https://unsplash.com/documentation#guidelines), including attribution rules if required.
+
 
 ## 🔐 Security Notes
 The google-services.json and gradle.properties are excluded from version control.  
 
 Ensure that you add your own credentials when testing or deploying the app.
 
+
 ## 🔑 Password Policy
 For account security, the following Firebase Authentication password policy is enforced:
+
 ✅ Enforcement Mode: Required
 
 ✅ Must include:
@@ -160,10 +196,13 @@ For account security, the following Firebase Authentication password policy is e
 If a user attempts to register or reset a password that does not meet these criteria, the system will reject the request and prompt them to use a stronger password.
 
 📌 Where to configure it:
-In Firebase Console > Authentication > Settings > Password policy, you can manually configure and enforce these rules for production deployment.
+
+In **Firebase Console** > **Authentication** > **Settings** > **Password policy**, you can manually configure and enforce these rules for production deployment.
+
 
 ## 📄 License
 This project is licensed under the MIT License – see the [LICENSE](./LICENSE) file for details.
+
 
 ## 📚 Third-Party APIs and Usage Terms
 
@@ -179,8 +218,10 @@ This app uses other APIs and libraries. Check each one’s rules or license for 
 
 All trademarks and brand names are the property of their respective owners.
 
+
 ## 🙋‍♂️ Author
 Wong Siong Yee
+
 Final Year Project (FYP) 2025 – Multimedia University Melaka (MMU)
 
 Feel free to open an issue or contact me on GitHub for questions.
