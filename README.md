@@ -82,11 +82,15 @@ To run the app properly, you will need to set up your own API keys for the follo
      - Go to **App Check** > **Your Android App** > Manage Debug Tokens 
      - Copy your app’s Debug Secret printed in Logcat (from `FirebaseAppCheck.getToken()`)
      - Paste it into the Firebase App Check Console to allow debug requests
-   - **Vertex AI**:
-     - Go to [Google Cloud Console](https://console.cloud.google.com/)
-     - Enable **Vertex AI API** under APIs & Services
-     - Make sure your Firebase project is linked to this Google Cloud project
-     - (You can use Firebase Extensions or SDK to connect)
+   - **Enable Firebase Vertex AI (Gemini)**:
+     1. Go to: [Firebase AI Logic](https://console.firebase.google.com/project/_/ailogic)
+     2. Select your app.
+     3. Click Enable Vertex AI (Gemini).
+     4. Ensure your Firebase project is linked to a Google Cloud Project.
+     5. In [Google Cloud Console](https://console.cloud.google.com/), enable:
+        - Vertex AI API
+        - Ensure billing is enabled (Google offers free tier)
+    You don’t need to handle API keys for Firebase AI — it uses built-in credentials.
        
 ---
 
