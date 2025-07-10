@@ -23,6 +23,8 @@ android {
 
         val tryOnApikey = project.findProperty("VIRTUAL_TRYON_API_KEY")?.toString() ?: ""
         buildConfigField("String", "VIRTUAL_TRYON_API_KEY", "\"$tryOnApikey\"")
+
+        buildConfigField("String", "IMGBB_API_KEY", "\"${property("IMGBB_API_KEY")}\"")
     }
 
     buildTypes {

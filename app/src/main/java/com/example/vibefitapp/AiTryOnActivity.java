@@ -479,7 +479,7 @@ public class AiTryOnActivity extends AppCompatActivity {
                         .build();
 
                 Request request = new Request.Builder()
-                        .url("https://api.imgbb.com/1/upload?key=0dc13dd04a87b46107b4bfba22cf39cd")
+                        .url("https://api.imgbb.com/1/upload?key=" + getImgbbApiKey())
                         .post(requestBody)
                         .build();
 
@@ -857,6 +857,9 @@ public class AiTryOnActivity extends AppCompatActivity {
 
     private String getApiKeyFromSecureStorage() {
         return BuildConfig.VIRTUAL_TRYON_API_KEY;
+    }
+    private String getImgbbApiKey() {
+        return BuildConfig.IMGBB_API_KEY;
     }
 
     interface Callback<T> {
