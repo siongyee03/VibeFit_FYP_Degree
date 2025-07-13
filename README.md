@@ -145,6 +145,33 @@ You can also view and manage indexes manually:
 
 Tip: During development, start with **Firestore in test mode** to avoid permission issues while configuring indexes.
 
+## 🛡️ Admin Registration & Role Access (Hidden Entry)
+To register an admin account for testing or demo purposes:
+
+1. Open the Login Page.
+2. Tap the VibeFit logo five times quickly – this will activate a hidden admin access prompt.
+3. When prompted, enter the secret admin code:
+```pgsql
+VIBE-ADMIN-ONLY
+```
+4. You’ll be taken to the Admin Registration Form.
+5. Enter a valid email address and create a password that meets the password policy:
+   - At least 8 characters
+   - Includes 1 uppercase, 1 lowercase, and 1 number
+6. A verification email will be sent to your address — you must verify it before logging in.
+7. After successful registration and verification, you can log in using the same login screen as normal users.
+
+### 🔑 Role-Based Access Control
+The app distinguishes access levels using a role field in Firestore, located at:
+
+```bash
+/users/{uid}/role
+```
+Possible values:
+- user: Regular user (default)
+- admin: Can manage posts
+- superadmin: Full access, including managing admin accounts
+
 
 ## 🗂️ Project Structure
 ```pgsql
